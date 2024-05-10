@@ -1,42 +1,45 @@
-import os
-from enum import Enum
 import tkinter as tk
-from tkinter import messagebox
 
-def info_dialogue(msg: str = "", title = "Info"):
-    messagebox.showinfo(title, msg)
-
-def warn_dialogue(msg: str, title = "Warning"):
-    messagebox.showwarning(title, msg)
-
-def err_dialogue(msg: str, title = "Error"):
-    messagebox.showerror(title, msg)
-
-def ask_yes_no(msg: str, title = "CrystalPass") -> bool:
-    response = messagebox.askyesno(title, msg)
-    return response
+import mod.common as common
+import mod.dialogue as dialogue
 
 # =============================
 # Action Functions
 # =============================
 
-def generate_password():
-    info_dialogue(msg="This will generate the password")
+def init():
+    # Setup all to options and config
+    # set initial manual text
+    pass
+
+def generate_password(pattern_entry : tk.StringVar, pwd_entry : tk.StringVar):
+    pattern = pattern_entry.get()
+    if pattern == "":
+        return
+    # Parse/Validate
+    # Generate
+    pwd_entry.set(pattern)
 
 def run_wizard():
-    info_dialogue(msg="This is where the wizard will be")
+    dialogue.info(msg="This is where the wizard will be")
 
 def open_manual():
-    info_dialogue(msg="This will open the manual")
+    dialogue.info(msg="This will open the manual")
 
-def copy_to_clipboard():
-    info_dialogue(msg="This will copy the generated password to the clipboard")
+def copy_to_clipboard(pwd_entry : tk.StringVar):
+    gen_pwd = pwd_entry.get()
+    if gen_pwd != "":
+        common.clipboard(gen_pwd)
 
 def explain_pattern():
-    info_dialogue(msg="This will explain the given pattern")
+    dialogue.info(msg="This will explain the given pattern")
 
 def open_advanced_options():
-    info_dialogue(msg="This will open the advanced options")
+    dialogue.info(msg="This will open the advanced options")
+
+# =============================
+# Window Loop
+# =============================
 
 def window_launch():
     window = tk.Tk()
@@ -48,11 +51,12 @@ def window_launch():
     window.geometry('1000x400')
     window.title("CrystalPass")
 
+    text_font = common.set_font()
+
     input_pattern = tk.StringVar()
     generated_password = tk.StringVar()
 
     # TODO: Explain Button
-    # TODO: Adv. Options Button
 
     # Frame for main interactions
     fr_main = tk.Frame(master=window, width=500, height=300, bg="white")
@@ -64,6 +68,7 @@ def window_launch():
 
     # UI feedback for password strength
     txt_guide = tk.Text(master=fr_guide, width=35, height=10, borderwidth=3, relief=tk.FLAT, bg="lightblue", state='disabled')
+    txt_guide.configure(font=text_font, cursor="")
     txt_guide.pack(fill=tk.BOTH, side=tk.TOP, padx=4, pady=4, expand=True)
 
     # frame to hold guide buttons
@@ -79,15 +84,16 @@ def window_launch():
     fr_entry.pack(fill=tk.X, anchor=tk.CENTER, expand=True)
 
     # frame to hold the input and wizard
-    fr_input = tk.Frame(master=fr_entry, bg="white")
-    fr_input.pack(fill=tk.X, side=tk.TOP, expand=True)
+    lf_input = tk.LabelFrame(master=fr_entry, text="Password Pattern", bg="white")
+    lf_input.pack(fill=tk.X, side=tk.TOP, expand=True)
 
     # Entry for password pattern
-    ent_pattern_input = tk.Entry(master=fr_input, textvariable=input_pattern, relief=tk.RIDGE, borderwidth=3, bg="white")
+    ent_pattern_input = tk.Entry(master=lf_input, textvariable=input_pattern, relief=tk.RIDGE, borderwidth=3, bg="white")
+    ent_pattern_input.configure(font=text_font)
     ent_pattern_input.pack(fill=tk.X, side=tk.LEFT, anchor=tk.CENTER, padx=4, pady=4, expand=True)
 
     # wizard button
-    btn_generate = tk.Button(master=fr_input, text="Wizard", height=1, width=10, relief=tk.RAISED, borderwidth=3, command=run_wizard)
+    btn_generate = tk.Button(master=lf_input, text="Wizard", height=1, width=10, relief=tk.RAISED, borderwidth=3, command=run_wizard)
     btn_generate.pack(side=tk.RIGHT, padx=4, pady=4, expand=False)
 
     # labelframe for the meter
@@ -104,15 +110,26 @@ def window_launch():
 
     # Entry for outputting the user password
     ent_password_output = tk.Entry(master=fr_output, textvariable=generated_password, state='disabled', relief=tk.RIDGE, borderwidth=3, bg="white")
+    ent_password_output.configure(font=text_font)
     ent_password_output.pack(fill=tk.X, side=tk.LEFT, padx=4, pady=4, expand=True)
 
     # clipboard button
-    btn_clipboard = tk.Button(master=fr_output, text="clipboard", height=1, width=10, relief=tk.RAISED, borderwidth=3, command=copy_to_clipboard)
+    btn_clipboard = tk.Button(master=fr_output, text="clipboard", height=1, width=10, relief=tk.RAISED, borderwidth=3, command=lambda: copy_to_clipboard(generated_password))
     btn_clipboard.pack(side=tk.RIGHT, padx=4, pady=4, expand=False)
 
+    # frame for entry buttons
+    fr_entry_buttons = tk.Frame(master=fr_entry, bg="white")
+    fr_entry_buttons.pack(fill=tk.NONE, side=tk.TOP, expand=True)
+
     # run or rerun the results
-    btn_generate = tk.Button(master=fr_entry, text="Generate", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=generate_password)
-    btn_generate.pack(side=tk.TOP, padx=4, pady=20, expand=False)
+    btn_generate = tk.Button(master=fr_entry_buttons, text="Generate", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=lambda: generate_password(input_pattern, generated_password))
+    btn_generate.pack(side=tk.LEFT, padx=10, pady=20, expand=False)
+
+    # button to open the advanced options
+    btn_options = tk.Button(master=fr_entry_buttons, text="Adv. Options", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=open_advanced_options)
+    btn_options.pack(side=tk.LEFT, padx=10, pady=20, expand=False)
+
+    init()
 
     window.mainloop()
 
