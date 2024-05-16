@@ -2,6 +2,7 @@ import tkinter as tk
 
 import mod.common as common
 import mod.dialogue as dialogue
+import mod.regex as regex
 
 # =============================
 # Action Functions
@@ -16,9 +17,11 @@ def generate_password(pattern_entry : tk.StringVar, pwd_entry : tk.StringVar):
     pattern = pattern_entry.get()
     if pattern == "":
         return
-    # Parse/Validate
-    # Generate
-    pwd_entry.set(pattern)
+    res = regex.generate(pattern)
+    if int(res[0]) < 0:
+        dialogue.err(msg="Invalid expression: "+res[1])
+        return
+    pwd_entry.set(res[1])
 
 def run_wizard():
     dialogue.info(msg="This is where the wizard will be")
@@ -91,6 +94,7 @@ def window_launch():
     ent_pattern_input = tk.Entry(master=lf_input, textvariable=input_pattern, relief=tk.RIDGE, borderwidth=3, bg="white")
     ent_pattern_input.configure(font=text_font)
     ent_pattern_input.pack(fill=tk.X, side=tk.LEFT, anchor=tk.CENTER, padx=4, pady=4, expand=True)
+    ent_pattern_input.bind("<Return>", (lambda event: generate_password(input_pattern, generated_password)))
 
     # wizard button
     btn_generate = tk.Button(master=lf_input, text="Wizard", height=1, width=10, relief=tk.RAISED, borderwidth=3, command=run_wizard)

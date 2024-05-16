@@ -1,3 +1,4 @@
+from typing import List
 import tkinter as tk
 from tkinter import font
 
@@ -17,3 +18,6 @@ def set_font(size = 12):
     elif "Courier" in fonts:
         return ("Courier", size)
     return font.nametofont("TkDefaultFont").actual()
+
+def find_first_of(s : str, l : List[str]) -> int:
+    return next((i for i, c in enumerate(s) if c in l),None)
