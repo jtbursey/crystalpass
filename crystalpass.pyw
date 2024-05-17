@@ -1,23 +1,34 @@
 import tkinter as tk
+import os
+import secrets
 
 import mod.common as common
 import mod.dialogue as dialogue
-import mod.regex as regex
+import mod.expression as exp
+import mod.wordlist as wordlist
+from mod.environment import Environment as env
+
+def init():
+    # get where we expect to be
+    selfpath = os.path.abspath(__file__)
+    os.chdir(os.path.dirname(selfpath))
+    # Setup environment
+    env.addlist = common.read_file_lines(env.addlist_file)
+    env.blocklist = common.read_file_lines(env.blocklist_file)
+    words = common.read_file_lines(env.wordlist_file)
+    words += env.addlist
+    env.wordlists = wordlist.split_words(words)
+    # set initial manual text
 
 # =============================
 # Action Functions
 # =============================
 
-def init():
-    # Setup all to options and config
-    # set initial manual text
-    pass
-
 def generate_password(pattern_entry : tk.StringVar, pwd_entry : tk.StringVar):
     pattern = pattern_entry.get()
     if pattern == "":
         return
-    res = regex.generate(pattern)
+    res = exp.generate(pattern)
     if int(res[0]) < 0:
         dialogue.err(msg="Invalid expression: "+res[1])
         return

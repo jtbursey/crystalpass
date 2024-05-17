@@ -19,5 +19,11 @@ def set_font(size = 12):
         return ("Courier", size)
     return font.nametofont("TkDefaultFont").actual()
 
+def read_file_lines(file : str):
+    infile = open(file, 'r')
+    lines = infile.readlines()
+    infile.close()
+    return lines
+
 def find_first_of(s : str, l : List[str]) -> int:
     return next((i for i, c in enumerate(s) if c in l),None)
