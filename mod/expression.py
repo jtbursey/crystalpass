@@ -1,4 +1,5 @@
 import string
+import secrets
 from enum import IntEnum
 from typing import List, Tuple
 
@@ -48,52 +49,194 @@ class Exp_Quad(IntEnum):
     BEGIN = 2
     END = 3
 
+class Names:
+    map = {}
+    generated = {}
+
 class Exp_None:
-    pass
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        return ""
 
 class Exp_Word:
     def __init__(self, l : Range = None, c : Exp_Quad = Exp_Quad.FALSE, s : bool = False) -> None:
         self.length = l
         self.caps = c
         self.subs = s
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        wl = []
+        if self.length == None:
+            for l in env.wordlists:
+                if len(l) > 0:
+                    wl += l
+        else:
+            for x in self.length.get():
+                wl += env.wordlists[x-1]
+        if len(wl) == 0:
+            return ""
+        word = secrets.choice(wl)
+        if self.caps == Exp_Quad.TRUE:
+            newword = ""
+            for l in word:
+                if secrets.SystemRandom().random() < env.capsFreq:
+                    newword += l.upper()
+                else:
+                    newword += l
+            word = newword
+        elif self.caps == Exp_Quad.BEGIN:
+            word = word[0].upper() + word[1:]
+        elif self.caps == Exp_Quad.END:
+            word = word[:-1] + word[-1].upper()
+        
+        if self.subs:
+            dialogue.info(msg="Subs is not implemented yet")
+        return word
 
 class Exp_Digit:
-    def __init__(self, l : int, s : List[int] = None, r : Range = Range(0,9)) -> None:
+    def __init__(self, l : Range = Range(1), s : List[int] = None) -> None:
         self.length = l
         self.set = s
-        self.range = r
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        digit = ""
+        set = []
+        if self.set != None:
+            set = list(self.set)
+        
+        length = secrets.choice(self.length.get())
+        for _ in range(length):
+            digit += secrets.choice(set)
+        return digit
 
 class Exp_Letter:
-    def __init__(self, l : int = 1, s : str = None, r : Range = Range('a', 'z'), c : bool = False) -> None:
+    def __init__(self, l : Range = Range(1), s : str = None, c : bool = False) -> None:
         self.length = l
         self.set = s
-        self.range = r
         self.caps = c
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        chars = ""
+        set = []
+        if self.set != None:
+            set = list(self.set)
+        
+        length = secrets.choice(self.length.get())
+        for _ in range(length):
+            chars += secrets.choice(set)
+        
+        newchars = ""
+        if self.caps:
+            for c in chars:
+                if secrets.SystemRandom().random() < env.capsFreq:
+                    newchars += c.upper()
+                else:
+                    newchars += c
+            chars = newchars
+
+        return chars
 
 class Exp_Symbol:
-    def __init__(self, l : int = 1, s : str = env.symbolSet) -> None:
+    def __init__(self, l : Range = Range(1), s : str = env.symbolSet) -> None:
         self.length = l
         self.set = s
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        syms = ""
+        set = []
+        if self.set != None:
+            set = list(self.set)
+        
+        length = secrets.choice(self.length.get())
+        for _ in range(length):
+            syms += secrets.choice(set)
+        return syms
 
 class Exp_Character:
     def __init__(self, l : Range = Range(1), s : str = env.symbolSet + string.ascii_lowercase) -> None:
         self.length = l
         self.set = s
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        chars = ""
+        set = []
+        if self.set != None:
+            set = list(self.set)
+        
+        length = secrets.choice(self.length.get())
+        for _ in range(length):
+            chars += secrets.choice(set)
+
+        return chars
 
 class Exp_Random:
     def __init__(self, l : List[any]) -> None:
         # A list of other expressions
         self.list = l
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        e = secrets.choice(self.list)
+        return e.generate()
 
 class Exp_Named:
-    def __init__(self, r : str, rev : bool = False, reg : bool = False) -> None:
-        self.reference = r
+    def __init__(self, n : str, rev : bool = False, reg : bool = False) -> None:
+        self.name = n
         self.reverse = rev
         self.regen = reg
+    
+    def entropy(self) -> float:
+        return Names.map[self.name].entropy()
 
-class Exp_LITERAL:
+    def generate(self) -> str:
+        gen = ""
+        if self.regen:
+            if self.name in Names.map:
+                gen = Names.map[self.name].generate()
+            else:
+                dialogue.err(title="Unknown Named Reference", msg=self.name + " does not exist.")
+                return ""
+        else:
+            if self.name in Names.generated:
+                gen = Names.generated[self.name]
+            else:
+                dialogue.err(title="Unknown Named Reference", msg=self.name + " has not been generated yet. The referenced expression must come first.")
+                return ""
+        
+        if self.reverse:
+            gen = gen[::-1]
+        
+        return gen
+
+
+class Exp_Literal:
     def __init__(self, s : str = "") -> None:
         self.literal = s
+    
+    def entropy(self) -> float:
+        return 0.0
+
+    def generate(self) -> str:
+        return self.literal
 
 class Expression:
     def __init__(self) -> None:
@@ -101,8 +244,11 @@ class Expression:
         self.exp = Exp_None()
         self.name = None
     
-    def entropy(self):
-        pass
+    def entropy(self) -> float:
+        return self.exp.entropy()
+
+    def generate(self) -> str:
+        return self.exp.generate()
     # TODO: json style output for saving patterns
 
 # this seems like a better idea than globals
@@ -218,7 +364,7 @@ def get_set(arg_list : List[str]) -> Tuple[Exp_Retval, List[str]]:
         return (Exp_Retval.INVALARG, s)
     return (Exp_Retval.OK, s)
 
-def get_next_arg(arg_list : List[str]) -> Tuple[Arg_Type, str, any, List[str]]:
+def get_next_arg(arg_list : List[str], quiet : bool = False) -> Tuple[Arg_Type, str, any, List[str]]:
     if len(arg_list) == 0 or len(arg_list[0]) == 0:
         return (Arg_Type.NONE, "", None, [])
 
@@ -232,9 +378,9 @@ def get_next_arg(arg_list : List[str]) -> Tuple[Arg_Type, str, any, List[str]]:
 
         s = ''.join(sorted(s[1:-1]))
         ns = ''.join(sorted(set(s)))
-        if env.tutorial and ns != s:
+        if env.tutorial and ns != s and not quiet:
             dialogue.warn(title="Invalid Set Argument", msg="Set arguments must have unique characters:\n"+s+"\n"+ns)
-        if env.tutorial and len(s) == 0:
+        if env.tutorial and len(s) == 0 and not quiet:
             dialogue.warn(title="Invalid Set Argument", msg="Set arguments must not be empty.")
         
         return (Arg_Type.SET, None, ns, rem)
@@ -280,7 +426,7 @@ def get_next_arg(arg_list : List[str]) -> Tuple[Arg_Type, str, any, List[str]]:
 
     return (Arg_Type.INVALID, None, None, rem)
 
-def parse_exp_string(exp_str : str) -> Tuple[Exp_Retval, Expression]:
+def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, Expression]:
     exp = Expression()
     if len(exp_str) == 0:
         return (Exp_Retval.EMPTY, exp)
@@ -289,7 +435,7 @@ def parse_exp_string(exp_str : str) -> Tuple[Exp_Retval, Expression]:
         t, n = longest_exp_substring(exp_str)
         if t == Exp_Type.NONE:
             exp.type = Exp_Type.LITERAL
-            exp.exp = Exp_LITERAL(exp_str)
+            exp.exp = Exp_Literal(exp_str)
             return (Exp_Retval.OK, exp)
         
         exp.type = t
@@ -304,50 +450,192 @@ def parse_exp_string(exp_str : str) -> Tuple[Exp_Retval, Expression]:
             arg_str = arg_str[:-1]
         args = arg_str.split(',')
         
-        while len(args) != 0:
-            at, an, val, args =  get_next_arg(args)
+        length = caps = subs = set = None
+        name = reverse =  regen = None
+        dup = None
+
+        while len(args) > 0 and (len(args) != 1 or len(args[0]) != 0):
+            at, an, val, args =  get_next_arg(args, quiet)
             if at == Arg_Type.AMBIG:
-                return (Exp_Retval.INVALARG, exp)
+                return (Exp_Retval.AMBIG, exp)
             elif at < 0:
                 return (Exp_Retval.INVALARG, exp)
-            # match case for each expression type
-            match at:
-                case Arg_Type.RANGE:
-                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+str(an)+'\n'+str(val.get()))
-                case Arg_Type.QUAD:
-                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+an+'\n'+str(val))
-                case Arg_Type.BOOL:
-                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+an+'\n'+str(val))
-                case Arg_Type.SET:
-                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+str(an)+'\n'+val)
-                case Arg_Type.STRING:
-                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+an+'\n'+val)
-                case Arg_Type.NONE:
-                    dialogue.info(msg="Arg:\nNo argument given")
+        
+            match an:
+                case "length":
+                    if length == None:
+                        length = val
+                    else:
+                        dup = "length"
+                case "caps":
+                    if caps == None:
+                        caps = val
+                    else:
+                        dup = "caps value"
+                case "subs":
+                    if subs == None:
+                        subs = val
+                    else:
+                        dup = "subs value"
+                case "name":
+                    if name == None:
+                        name = val
+                    else:
+                        dup = "name"
+                case "reverse":
+                    if reverse == None:
+                        reverse = val
+                    else:
+                        dup = "reverse value"
+                case "regen":
+                    if regen == None:
+                        regen = val
+                    else:
+                        dup = "regen value"
+                case None:
+                    if at == Arg_Type.SET:
+                        if set == None:
+                            set = val
+                        else:
+                            dup = "set"
+                    elif at == Arg_Type.RANGE:
+                        if set == None:
+                            set = ''.join([str(x) for x in val.get()])
+                        else:
+                            dup = "range"
+                case _:
+                    return (Exp_Retval.INVALARG, exp)
+
+            if dup != None:
+                if not quiet:
+                    dialogue.warn(title="Duplicate Argument", msg="A duplicate "+dup+" was provided. Ignoring.")
+                dup = None
+        
+        if name != None:
+            exp.name = name
+
+        match t:
+            case Exp_Type.WORD:
+                if caps == None:
+                    caps = Exp_Quad.FALSE
+                if subs == None:
+                    subs = False
+                if set != None or reverse != None or regen != None:
+                    return (Exp_Retval.INVALARG, exp)
+                exp.exp = Exp_Word(length, caps, subs)
+                if exp.name != None:
+                    Names.map[exp.name] = exp
+                return (Exp_Retval.OK, exp)
+            case Exp_Type.DIGIT:
+                if length == None:
+                    length = Range(1)
+                if set == None:
+                    set = ''.join([str(x) for x in Range(0, 9).get()])
+                if caps != None or subs != None or reverse != None or regen != None:
+                    return (Exp_Retval.INVALARG, exp)
+                if not all(x in string.digits for x in set):
+                    return (Exp_Retval.INVALARG, exp)
+                exp.exp = Exp_Digit(length, set)
+                if exp.name != None:
+                    Names.map[exp.name] = exp
+                return (Exp_Retval.OK, exp)
+            case Exp_Type.LETTER:
+                if length == None:
+                    length = Range(1)
+                if set == None:
+                    set = string.ascii_lowercase
+                if caps == None:
+                    caps = False
+                elif caps in [Exp_Quad.BEGIN, Exp_Quad.END]:
+                    if not quiet:
+                        dialogue.warn(title="Invalid Caps Value", msg="Caps value for a letter should be true or false. Using true.")
+                    caps = False
+                if subs != None or reverse != None or regen != None:
+                    return (Exp_Retval.INVALARG, exp)
+                if not all(x in string.ascii_letters for x in set):
+                    return (Exp_Retval.INVALARG, exp)
+                exp.exp = Exp_Letter(length, set, caps)
+                if exp.name != None:
+                    Names.map[exp.name] = exp
+                return (Exp_Retval.OK, exp)
+            case Exp_Type.SYMBOL:
+                if length == None:
+                    length = Range(1)
+                if set == None:
+                    set = env.symbolSet
+                if caps != None or subs != None or reverse != None or regen != None:
+                    return (Exp_Retval.INVALARG, exp)
+                if not all(x in string.punctuation for x in set):
+                    return (Exp_Retval.INVALARG, exp)
+                exp.exp = Exp_Symbol(length, set)
+                if exp.name != None:
+                    Names.map[exp.name] = exp
+                return (Exp_Retval.OK, exp)
+            case Exp_Type.CHARACTER:
+                if length == None:
+                    length = Range(1)
+                if set == None:
+                    set = env.symbolSet + string.ascii_lowercase
+                if caps != None or subs != None or reverse != None or regen != None:
+                    return (Exp_Retval.INVALARG, exp)
+                if not all(x in string.ascii_letters + string.punctuation for x in set):
+                    return (Exp_Retval.INVALARG, exp)
+                exp.exp = Exp_Character(length, set)
+                if exp.name != None:
+                    Names.map[exp.name] = exp
+                return (Exp_Retval.OK, exp)
+            case Exp_Type.NAMED:
+                exp.name = None
+                if name == None:
+                    if not quiet:
+                        dialogue.err(title="Missing Argument", msg="A named expression must reference another expression.")
+                    return (Exp_Retval.INVALEXPR, exp)
+                if reverse == None:
+                    reverse = False
+                if regen == None:
+                    regen = False
+                if length != None or set != None or caps != None or subs != None:
+                    return (Exp_Retval.INVALARG, exp)
+                exp.exp = Exp_Named(name, reverse, regen)
+                return (Exp_Retval.OK, exp)
+            case _:
+                return (Exp_Retval.INVALEXPR, exp)
+
     else:
         exp.type = Exp_Type.LITERAL
-        exp.exp = Exp_LITERAL(exp_str)
+        exp.exp = Exp_Literal(exp_str)
     
     return (Exp_Retval.OK, exp)
 
-def parse(pattern : str) -> Tuple[Exp_Retval, List[Expression]]:
+def parse(pattern : str, quiet : bool = False) -> Tuple[Exp_Retval, List[Expression]]:
+    elist = []
     while len(pattern) != 0:
         ret, expr, pattern = get_next_exp_string(pattern)
         if ret < 0:
-            return (ret, expr)
+            return (ret, [])
         elif ret == Exp_Retval.EMPTY:
             break
-        ret, exp = parse_exp_string(expr)
+        ret, exp = parse_exp_string(expr, quiet)
         if ret < 0:
-            return (ret, expr)
-    return (ret, [Expression()])
+            return (ret, [])
+        elist.append(exp)
+    return (ret, elist)
 
 def validate(pattern : str) -> Exp_Retval:
-    ret, _ = parse(pattern)
+    ret, _ = parse(pattern, True)
     return ret
 
 def generate(pattern : str) -> Tuple[Exp_Retval, str]:
     ret, exprs = parse(pattern)
-    # generate a string from the list of expressions
+    if ret < 0:
+        return (ret, pattern)
 
-    return (ret, "someday")
+    password = ""
+    for e in exprs:
+        gen = e.generate()
+        if e.name != None:
+            Names.generated[e.name] = gen
+        password += gen
+    Names.generated.clear()
+    Names.map.clear()
+    return (ret, password)
