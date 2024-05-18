@@ -28,9 +28,8 @@ class Exp_Type(IntEnum):
     LETTER = 3
     SYMBOL = 4
     CHARACTER = 5
-    RANDOM = 6
-    NAMED = 7
-    LITERAL = 8
+    NAMED = 6
+    LITERAL = 7
 
 class Arg_Type(IntEnum):
     AMBIG = -2
@@ -186,18 +185,6 @@ class Exp_Character:
 
         return chars
 
-class Exp_Random:
-    def __init__(self, l : List[any]) -> None:
-        # A list of other expressions
-        self.list = l
-    
-    def entropy(self) -> float:
-        return 0.0
-
-    def generate(self) -> str:
-        e = secrets.choice(self.list)
-        return e.generate()
-
 class Exp_Named:
     def __init__(self, n : str, rev : bool = False, reg : bool = False) -> None:
         self.name = n
@@ -253,7 +240,7 @@ class Expression:
 
 # this seems like a better idea than globals
 class Expression_Config:
-    expression_names = [(Exp_Type.WORD, "word"), (Exp_Type.DIGIT, "digit"), (Exp_Type.DIGIT, "number"), (Exp_Type.LETTER, "letter"), (Exp_Type.SYMBOL, "symbol"), (Exp_Type.CHARACTER, "character"), (Exp_Type.RANDOM, "random"), (Exp_Type.NAMED, "named")]
+    expression_names = [(Exp_Type.WORD, "word"), (Exp_Type.DIGIT, "digit"), (Exp_Type.DIGIT, "number"), (Exp_Type.LETTER, "letter"), (Exp_Type.SYMBOL, "symbol"), (Exp_Type.CHARACTER, "character"), (Exp_Type.NAMED, "named")]
     arg_names = ["length", "caps", "subs", "name", "regen", "reverse"]
     quad_map = [(Exp_Quad.TRUE, "true"), (Exp_Quad.FALSE, "false"), (Exp_Quad.BEGIN, "begin"), (Exp_Quad.END, "end")]
     bool_map = [(True, "true"), (False, "false")]
@@ -439,9 +426,6 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
             return (Exp_Retval.OK, exp)
         
         exp.type = t
-        if t == Exp_Type.RANDOM:
-            exp.exp = Exp_Random([])
-            return (Exp_Retval.OK, exp)
 
         arg_str = exp_str[len(n):]
         if arg_str.startswith('['):
