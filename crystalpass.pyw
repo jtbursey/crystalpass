@@ -1,6 +1,5 @@
 import tkinter as tk
 import os
-import secrets
 
 import mod.common as common
 import mod.dialogue as dialogue
@@ -28,11 +27,36 @@ def generate_password(pattern_entry : tk.StringVar, pwd_entry : tk.StringVar):
     pattern = pattern_entry.get()
     if pattern == "":
         return
-    res = exp.generate(pattern)
-    if int(res[0]) < 0:
-        dialogue.err(msg="Invalid expression: "+res[1])
+    err, password = exp.generate(pattern)
+    if err == exp.Exp_Retval.INVALARG:
+        dialogue.err(title="Invalid Argument", msg="Invalid argument:\n"+password)
+        pwd_entry.set("")
         return
-    pwd_entry.set(res[1])
+    elif err == exp.Exp_Retval.INVALEXPR:
+        dialogue.err(title="Invalid Expression", msg="Invalid expression:\n"+password)
+        pwd_entry.set("")
+        return
+    elif err == exp.Exp_Retval.INVALSYMBOL:
+        dialogue.err(title="Invalid Symbol", msg="Invalid symbol:\n"+password)
+        pwd_entry.set("")
+        return
+    elif err == exp.Exp_Retval.AMBIG:
+        dialogue.err(title="Ambiguous Expression", msg="Ambiguous expression:\n"+password)
+        pwd_entry.set("")
+        return
+    elif err == exp.Exp_Retval.EXTRAARG:
+        dialogue.err(title="Extra Argument", msg="Extra argument:\n"+password)
+        pwd_entry.set("")
+        return
+    elif err == exp.Exp_Retval.NOARG:
+        dialogue.err(title="Missing Argument", msg="Missing argument:\n"+password)
+        pwd_entry.set("")
+        return
+    elif int(err) < 0:
+        dialogue.err(title="Invalid Pattern", msg="Failed to parse pattern:\n"+password)
+        pwd_entry.set("")
+        return
+    pwd_entry.set(password)
 
 def run_wizard():
     dialogue.info(msg="This is where the wizard will be")
