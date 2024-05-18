@@ -16,8 +16,8 @@ def init():
     env.addlist = common.read_file_lines(env.addlist_file)
     env.blocklist = common.read_file_lines(env.blocklist_file)
     words = common.read_file_lines(env.wordlist_file)
-    words += env.addlist
-    env.wordlists = wordlist.split_words(words)
+
+    env.wordlists = wordlist.split_words(words, env.addlist, env.blocklist)
     # set initial manual text
 
 # =============================

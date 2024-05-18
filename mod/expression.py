@@ -3,6 +3,7 @@ from enum import IntEnum
 from typing import List, Tuple
 
 from mod.range import Range
+from mod.range import parse_range
 import mod.common as common
 import mod.entropy as entropy
 from mod.environment import Environment as env
@@ -17,6 +18,7 @@ class Exp_Retval(IntEnum):
     INVALSYMBOL = -3
     INVALEXPR = -4
     INVALARG = -5
+    AMBIG = -6
 
 class Exp_Type(IntEnum):
     NONE = 0
@@ -30,6 +32,7 @@ class Exp_Type(IntEnum):
     LITERAL = 8
 
 class Arg_Type(IntEnum):
+    AMBIG = -2
     INVALID = -1
     NONE = 0
     RANGE = 1
@@ -78,10 +81,9 @@ class Exp_Character:
         self.set = s
 
 class Exp_Random:
-    def __init__(self, l) -> None:
+    def __init__(self, l : List[any]) -> None:
         # A list of other expressions
         self.list = l
-        pass
 
 class Exp_Named:
     def __init__(self, r : str, rev : bool = False, reg : bool = False) -> None:
@@ -106,7 +108,26 @@ class Expression:
 # this seems like a better idea than globals
 class Expression_Config:
     expression_names = [(Exp_Type.WORD, "word"), (Exp_Type.DIGIT, "digit"), (Exp_Type.DIGIT, "number"), (Exp_Type.LETTER, "letter"), (Exp_Type.SYMBOL, "symbol"), (Exp_Type.CHARACTER, "character"), (Exp_Type.RANDOM, "random"), (Exp_Type.NAMED, "named")]
+    arg_names = ["length", "caps", "subs", "name", "regen", "reverse"]
+    quad_map = [(Exp_Quad.TRUE, "true"), (Exp_Quad.FALSE, "false"), (Exp_Quad.BEGIN, "begin"), (Exp_Quad.END, "end")]
+    bool_map = [(True, "true"), (False, "false")]
     escaped_chars = env.escape + ""
+
+def longest_val_match(val : str, map) -> any:
+    matches = [v for v in map if v[1].startswith(val.lower())]
+    if len(matches) > 1:
+        return (Exp_Retval.AMBIG, val)
+    elif len(matches) == 0:
+        return (Exp_Retval.INVALARG, val)
+    return (Exp_Retval.OK, matches[0][0])
+
+def longest_arg_match(arg : str) -> Tuple[Exp_Retval, str]:
+    matches = [an for an in Expression_Config.arg_names if an.startswith(arg)]
+    if len(matches) > 1:
+        return (Exp_Retval.AMBIG, arg)
+    elif len(matches) == 0:
+        return (Exp_Retval.INVALARG, arg)
+    return (Exp_Retval.OK, matches[0])
 
 def longest_exp_substring(pattern : str) -> Tuple[Exp_Type, str]:
     best = (Exp_Type.NONE, "")
@@ -211,16 +232,53 @@ def get_next_arg(arg_list : List[str]) -> Tuple[Arg_Type, str, any, List[str]]:
 
         s = ''.join(sorted(s[1:-1]))
         ns = ''.join(sorted(set(s)))
-        dialogue.info(s)
         if env.tutorial and ns != s:
             dialogue.warn(title="Invalid Set Argument", msg="Set arguments must have unique characters:\n"+s+"\n"+ns)
         if env.tutorial and len(s) == 0:
             dialogue.warn(title="Invalid Set Argument", msg="Set arguments must not be empty.")
         
-        return (Arg_Type.SET, None, s, rem)
-    # get the name of the arg -> determines type
-    # get the value
-    pass
+        return (Arg_Type.SET, None, ns, rem)
+
+    arg = arg_list[0].strip()
+    rem = arg_list[1:]
+    if arg.find('=') < 0:
+        val = parse_range(arg, False)
+        if val == None:
+            return (Arg_Type.INVALID, None, arg, rem)
+        return (Arg_Type.RANGE, None, val, rem)
+    
+    # name of arg determines the type
+    arg = arg.split('=')
+    if len(arg) < 2:
+        return (Arg_Type.AMBIG, arg[0], arg[1:], rem)
+
+    err, an = longest_arg_match(arg[0].strip())
+    if err == Exp_Retval.AMBIG:
+        return (Arg_Type.AMBIG, an, arg[1], rem)
+    elif err < 0:
+        return (Arg_Type.INVALID, an, arg[1], rem)
+
+    arg[1] = arg[1].strip()
+    if an == "length":
+        val = parse_range(arg[1], False)
+        if val == None:
+            return (Arg_Type.INVALID, an, arg, rem)
+        return (Arg_Type.RANGE, an, val, rem)
+    elif an == "caps":
+        err, val = longest_val_match(arg[1], Expression_Config.quad_map)
+        if err < 0:
+            return (Arg_Type.INVALID, an, arg[1], rem)
+        return (Arg_Type.QUAD, an, val, rem)
+    elif an == "subs" or an == "regen" or an == "reverse":
+        err, val = longest_val_match(arg[1], Expression_Config.bool_map)
+        if err < 0:
+            return (Arg_Type.INVALID, an, arg[1], rem)
+        return (Arg_Type.BOOL, an, val, rem)
+    elif an == "name":
+        if arg[1].isalnum():
+            return (Arg_Type.STRING, an, arg[1], rem)
+
+    return (Arg_Type.INVALID, None, None, rem)
 
 def parse_exp_string(exp_str : str) -> Tuple[Exp_Retval, Expression]:
     exp = Expression()
@@ -248,9 +306,24 @@ def parse_exp_string(exp_str : str) -> Tuple[Exp_Retval, Expression]:
         
         while len(args) != 0:
             at, an, val, args =  get_next_arg(args)
-            if at < 0:
+            if at == Arg_Type.AMBIG:
+                return (Exp_Retval.INVALARG, exp)
+            elif at < 0:
                 return (Exp_Retval.INVALARG, exp)
             # match case for each expression type
+            match at:
+                case Arg_Type.RANGE:
+                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+str(an)+'\n'+str(val.get()))
+                case Arg_Type.QUAD:
+                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+an+'\n'+str(val))
+                case Arg_Type.BOOL:
+                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+an+'\n'+str(val))
+                case Arg_Type.SET:
+                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+str(an)+'\n'+val)
+                case Arg_Type.STRING:
+                    dialogue.info(msg="Arg:\n"+str(at)+'\n'+an+'\n'+val)
+                case Arg_Type.NONE:
+                    dialogue.info(msg="Arg:\nNo argument given")
     else:
         exp.type = Exp_Type.LITERAL
         exp.exp = Exp_LITERAL(exp_str)
@@ -278,4 +351,3 @@ def generate(pattern : str) -> Tuple[Exp_Retval, str]:
     # generate a string from the list of expressions
 
     return (ret, "someday")
-    #get_next_exp_string(pattern)[0:2]
