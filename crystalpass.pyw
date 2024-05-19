@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import font
 import os
 from typing import List
 
@@ -8,30 +9,33 @@ import mod.expression as exp
 import mod.wordlist as wordlist
 from mod.environment import Environment as env
 from manual.quick_guide import Quick_Guide as qg
+from mod.wizard import Wizard
 
 class Window:
-    master = None
-    font = None
-    input = None
-    password = None
-    fr_main = None
-    fr_guide = None
-    txt_guide = None
-    fr_guide_buttons = None
-    btn_manual = None
-    fr_entry = None
-    lf_input = None
-    ent_pattern_input = None
-    btn_wizard = None
-    lf_meter = None
-    lbl_meter = None
-    fr_output = None
-    ent_password_output = None
-    btn_clipboard = None
-    fr_entry_buttons = None
-    btn_generate = None
-    btn_explain = None
-    btn_options = None
+    master : tk.Tk
+    font : font
+    input : tk.StringVar
+    password : tk.StringVar
+    fr_main : tk.Frame
+    fr_guide : tk.Frame
+    txt_guide : tk.Text
+    fr_guide_buttons : tk.Frame
+    btn_manual : tk.Button
+    fr_entry : tk.Frame
+    lf_input : tk.LabelFrame
+    ent_pattern_input: tk.Entry
+    btn_wizard : tk.Button
+    lf_meter : tk.LabelFrame
+    lbl_meter : tk.Label
+    fr_output : tk.Frame
+    ent_password_output : tk.Entry
+    btn_clipboard : tk.Button
+    fr_entry_buttons : tk.Frame
+    btn_generate : tk.Button
+    btn_explain : tk.Button
+    btn_options : tk.Button
+
+    wizard_open = False
 
 def write_txt(lines : List[str], txt : tk.Text):
     txt.configure(state='normal')
@@ -69,7 +73,14 @@ def generate_password():
     Window.password.set(password)
 
 def run_wizard():
-    dialogue.info(msg="This is where the wizard will be")
+    if not Window.wizard_open:
+        Window.wizard_open = True
+        output = Wizard.run(parent=Window.master)
+        Window.wizard_open = False
+        app = Window.input.get()
+        Window.input.set(app + output)
+    else:
+        dialogue.info("The wizard is already open.")
 
 def update_guide():
     pass
