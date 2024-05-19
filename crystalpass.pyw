@@ -30,14 +30,15 @@ class Window:
     btn_clipboard = None
     fr_entry_buttons = None
     btn_generate = None
+    btn_explain = None
     btn_options = None
 
-def write_qg(lines : List[str]):
-    Window.txt_guide.configure(state='normal')
-    Window.txt_guide.delete(0.0, tk.END)
+def write_txt(lines : List[str], txt : tk.Text):
+    txt.configure(state='normal')
+    txt.delete(0.0, tk.END)
     for l in lines:
-        Window.txt_guide.insert(tk.END, l + '\n')
-    Window.txt_guide.configure(state='disabled')
+        txt.insert(tk.END, l + '\n')
+    txt.configure(state='disabled')
 
 def init():
     # get where we expect to be
@@ -50,7 +51,7 @@ def init():
 
     env.wordlists = wordlist.split_words(words, env.addlist, env.blocklist)
     # set initial manual text
-    write_qg(qg.default)
+    write_txt(qg.default, Window.txt_guide)
 
 # =============================
 # Action Functions
@@ -61,38 +62,17 @@ def generate_password():
     if pattern == "":
         return
     err, password = exp.generate(pattern)
-    if err == exp.Exp_Retval.INVALARG:
-        dialogue.err(title="Invalid Argument", msg="Invalid argument:\n"+password)
-        Window.password.set("")
-        return
-    elif err == exp.Exp_Retval.INVALEXPR:
-        dialogue.err(title="Invalid Expression", msg="Invalid expression:\n"+password)
-        Window.password.set("")
-        return
-    elif err == exp.Exp_Retval.INVALSYMBOL:
-        dialogue.err(title="Invalid Symbol", msg="Invalid symbol:\n"+password)
-        Window.password.set("")
-        return
-    elif err == exp.Exp_Retval.AMBIG:
-        dialogue.err(title="Ambiguous Expression", msg="Ambiguous expression:\n"+password)
-        Window.password.set("")
-        return
-    elif err == exp.Exp_Retval.EXTRAARG:
-        dialogue.err(title="Extra Argument", msg="Extra argument:\n"+password)
-        Window.password.set("")
-        return
-    elif err == exp.Exp_Retval.NOARG:
-        dialogue.err(title="Missing Argument", msg="Missing argument:\n"+password)
-        Window.password.set("")
-        return
-    elif int(err) < 0:
-        dialogue.err(title="Invalid Pattern", msg="Failed to parse pattern:\n"+password)
+    if int(err) < 0:
+        exp.handle_err(err, password)
         Window.password.set("")
         return
     Window.password.set(password)
 
 def run_wizard():
     dialogue.info(msg="This is where the wizard will be")
+
+def update_guide():
+    pass
 
 def open_manual():
     dialogue.info(msg="This will open the manual")
@@ -103,7 +83,21 @@ def copy_to_clipboard():
         common.clipboard(gen_pwd)
 
 def explain_pattern():
-    dialogue.info(msg="This will explain the given pattern")
+    pattern = Window.input.get()
+    if pattern == "":
+        return
+
+    err, exprs = exp.parse(pattern)
+    if err < 0:
+        exp.handle_err(err, exprs)
+        return
+
+    lines = exp.get_explanation(exprs)
+    explain = tk.Toplevel(Window.master)
+    explain.wm_title("Explanation")
+    txt = tk.Text(master=explain, width=75, height=35, borderwidth=3, relief=tk.FLAT, bg="white", state='disabled')
+    txt.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+    write_txt(lines, txt)
 
 def open_advanced_options():
     dialogue.info(msg="This will open the advanced options")
@@ -126,8 +120,6 @@ def window_launch():
 
     Window.input = tk.StringVar()
     Window.password = tk.StringVar()
-
-    # TODO: Explain Button
 
     # Frame for main interactions
     Window.fr_main = tk.Frame(master=Window.master, width=500, height=300, bg="white")
@@ -196,6 +188,10 @@ def window_launch():
     # run or rerun the results
     Window.btn_generate = tk.Button(master=Window.fr_entry_buttons, text="Generate", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=generate_password)
     Window.btn_generate.pack(side=tk.LEFT, padx=10, pady=20, expand=False)
+
+    # run or rerun the results
+    Window.btn_explain = tk.Button(master=Window.fr_entry_buttons, text="Explain", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=explain_pattern)
+    Window.btn_explain.pack(side=tk.LEFT, padx=10, pady=20, expand=False)
 
     # button to open the advanced options
     Window.btn_options = tk.Button(master=Window.fr_entry_buttons, text="Adv. Options", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=open_advanced_options)

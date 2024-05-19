@@ -44,7 +44,7 @@ class Arg_Type(IntEnum):
     SET = 5
     STRING = 6
 
-class Exp_Quad(IntEnum):
+class Quad(IntEnum):
     FALSE = 0
     TRUE = 1
     BEGIN = 2
@@ -62,7 +62,7 @@ class Exp_None:
         return ""
 
 class Exp_Word:
-    def __init__(self, l : Range = None, c : Exp_Quad = Exp_Quad.FALSE, s : bool = False) -> None:
+    def __init__(self, l : Range = None, c : Quad = Quad.FALSE, s : bool = False) -> None:
         self.length = l
         self.caps = c
         self.subs = s
@@ -82,7 +82,7 @@ class Exp_Word:
         if len(wl) == 0:
             return ""
         word = secrets.choice(wl)
-        if self.caps == Exp_Quad.TRUE:
+        if self.caps == Quad.TRUE:
             newword = ""
             for l in word:
                 if secrets.SystemRandom().random() < env.capsFreq:
@@ -90,9 +90,9 @@ class Exp_Word:
                 else:
                     newword += l
             word = newword
-        elif self.caps == Exp_Quad.BEGIN:
+        elif self.caps == Quad.BEGIN:
             word = word[0].upper() + word[1:]
-        elif self.caps == Exp_Quad.END:
+        elif self.caps == Quad.END:
             word = word[:-1] + word[-1].upper()
         
         if self.subs:
@@ -244,8 +244,9 @@ class Expression:
 class Expression_Config:
     expression_names = [(Exp_Type.WORD, "word"), (Exp_Type.DIGIT, "digit"), (Exp_Type.LETTER, "letter"), (Exp_Type.SYMBOL, "symbol"), (Exp_Type.CHARACTER, "character"), (Exp_Type.NAMED, "named")]
     arg_names = ["length", "caps", "subs", "name", "regen", "reverse"]
-    quad_map = [(Exp_Quad.TRUE, "true"), (Exp_Quad.FALSE, "false"), (Exp_Quad.BEGIN, "begin"), (Exp_Quad.END, "end")]
+    quad_map = [(Quad.TRUE, "true"), (Quad.FALSE, "false"), (Quad.BEGIN, "begin"), (Quad.END, "end")]
     bool_map = [(True, "true"), (False, "false")]
+    quad_dict = {Quad.TRUE : "True", Quad.FALSE : "False", Quad.BEGIN : "Begin", Quad.END : "End"}
     escaped_chars = env.escape + ""
 
 def longest_val_match(val : str, map) -> any:
@@ -506,7 +507,7 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
         match t:
             case Exp_Type.WORD:
                 if caps == None:
-                    caps = Exp_Quad.FALSE
+                    caps = Quad.FALSE
                 if subs == None:
                     subs = False
                 if set != None or reverse != None or regen != None:
@@ -535,7 +536,7 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
                     set = string.ascii_lowercase
                 if caps == None:
                     caps = False
-                elif caps in [Exp_Quad.BEGIN, Exp_Quad.END]:
+                elif caps in [Quad.BEGIN, Quad.END]:
                     if not quiet and env.tutorial:
                         dialogue.warn(title="Invalid Caps Value", msg="Caps value for a letter should be true or false. Using true.")
                     caps = False
@@ -628,3 +629,69 @@ def generate(pattern : str) -> Tuple[Exp_Retval, str]:
     Names.generated.clear()
     Names.map.clear()
     return (ret, password)
+
+def handle_err(err : Exp_Retval, txt : str):
+    if err == Exp_Retval.INVALARG:
+        dialogue.err(title="Invalid Argument", msg="Invalid argument:\n"+txt)
+    elif err == Exp_Retval.INVALEXPR:
+        dialogue.err(title="Invalid Expression", msg="Invalid expression:\n"+txt)
+    elif err == Exp_Retval.INVALSYMBOL:
+        dialogue.err(title="Invalid Symbol", msg="Invalid symbol:\n"+txt)
+    elif err == Exp_Retval.AMBIG:
+        dialogue.err(title="Ambiguous Expression", msg="Ambiguous expression:\n"+txt)
+    elif err == Exp_Retval.EXTRAARG:
+        dialogue.err(title="Extra Argument", msg="Extra argument:\n"+txt)
+    elif err == Exp_Retval.NOARG:
+        dialogue.err(title="Missing Argument", msg="Missing argument:\n"+txt)
+    elif int(err) < 0:
+        dialogue.err(title="Invalid Pattern", msg="Failed to parse pattern:\n"+txt)
+
+def get_explanation(exprs : List[Expression]) -> List[str]:
+    lines = []
+    for e in exprs:
+        match e.type:
+            case Exp_Type.WORD:
+                if e.exp.length == None:
+                    l = "Any"
+                else:
+                    l = str(e.exp.length.get())
+                lines += ["Expression Type: Word",
+                          "   Possible word lengths:   " + l,
+                          "   Use Capitals:            " + Expression_Config.quad_dict[e.exp.caps],
+                          "   Use ASCII Substitutions: " + str(e.exp.subs)
+                         ]
+            case Exp_Type.DIGIT:
+                lines += ["Expression Type: Digit",
+                          "   Possible lengths: " + str(e.exp.length.get()),
+                          "   Possible digits:  " + e.exp.set
+                         ]
+            case Exp_Type.LETTER:
+                lines += ["Expression Type: Letter",
+                          "   Possible lengths: " + str(e.exp.length.get()),
+                          "   Possible letters: " + e.exp.set,
+                          "   Use caps: " + str(e.exp.caps)
+                         ]
+            case Exp_Type.SYMBOL:
+                lines += ["Expression Type: Symbol",
+                          "   Possible lengths: " + str(e.exp.length.get()),
+                          "   Possible symbols: " + e.exp.set
+                         ]
+            case Exp_Type.CHARACTER:
+                lines += ["Expression Type: Character",
+                          "   Possible lengths: " + str(e.exp.length.get()),
+                          "   Possible symbols: " + e.exp.set
+                         ]
+            case Exp_Type.NAMED:
+                lines += ["Expression Type: Named Reference",
+                          "   Reference:             " + e.exp.name,
+                          "   Reverse expression:    " + str(e.exp.reverse),
+                          "   Regenerate expression: " + str(e.exp.regen)
+                         ]
+            case Exp_Type.LITERAL:
+                lines += ["Expression Type: Literal",
+                          "   Value: " + e.exp.literal
+                         ]
+        if e.name != None:
+            lines += ["   Expression Name: " + e.name]
+        lines += [""]
+    return lines
