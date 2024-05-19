@@ -119,7 +119,7 @@ def window_launch():
     Window.master.unbind_all("<<NextWindow>>")
     Window.master.unbind_all("<Return>")
     # TODO: Get screen resolution and scale to that, also middle of screen
-    Window.master.geometry('1000x400')
+    Window.master.geometry('1200x450')
     Window.master.title("CrystalPass")
 
     Window.font = common.set_font()
@@ -138,7 +138,7 @@ def window_launch():
     Window.fr_guide.pack(fill=tk.Y, side=tk.LEFT, expand=False)
 
     # UI feedback for password strength
-    Window.txt_guide = tk.Text(master=Window.fr_guide, width=35, height=10, borderwidth=3, relief=tk.FLAT, bg="lightblue", state='disabled')
+    Window.txt_guide = tk.Text(master=Window.fr_guide, width=35, height=17, borderwidth=3, relief=tk.FLAT, bg="lightblue", state='disabled')
     Window.txt_guide.configure(font=Window.font, cursor="")
     Window.txt_guide.pack(fill=tk.BOTH, side=tk.TOP, padx=4, pady=4, expand=True)
 
