@@ -24717,9 +24717,7 @@ gyp
 gypped
 gypping
 gyps
-gypsies
 gypsum
-gypsy
 gyrate
 gyrated
 gyrates
@@ -25829,12 +25827,8 @@ hiccup
 hiccuped
 hiccuping
 hiccups
-hick
-hickey
-hickeys
 hickories
 hickory
-hicks
 hid
 hidden
 hide
