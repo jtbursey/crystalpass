@@ -247,7 +247,7 @@ class Expression_Config:
     quad_map = [(Quad.TRUE, "true"), (Quad.FALSE, "false"), (Quad.BEGIN, "begin"), (Quad.END, "end")]
     bool_map = [(True, "true"), (False, "false")]
     quad_dict = {Quad.TRUE : "True", Quad.FALSE : "False", Quad.BEGIN : "Begin", Quad.END : "End"}
-    escaped_chars = env.escape + ""
+    escaped_chars = env.escape + "[]\""
 
 def longest_val_match(val : str, map) -> any:
     matches = [v for v in map if v[1].startswith(val.lower())]
@@ -295,6 +295,17 @@ def find_exp_parity(pattern : str, l = '[', r = ']') -> Tuple[Exp_Retval, str]:
 
     return (Exp_Retval.OK, pattern[0:pos1])
 
+def escape(s : str) -> str:
+    new = ""
+    for c in s:
+        if c == env.escape:
+            continue
+        if c in Expression_Config.escaped_chars:
+            new += "\\"+c
+        else:
+            new += c
+    return new
+
 def get_next_exp_string(pattern : str) -> Tuple[Exp_Retval, str, str]:
     if len(pattern) == 0:
         return (Exp_Retval.EMPTY, "", "")
@@ -306,7 +317,7 @@ def get_next_exp_string(pattern : str) -> Tuple[Exp_Retval, str, str]:
 
         _, exp = longest_exp_substring(pattern)
         if len(exp) == 1:
-            if len(pattern) > 1 and pattern[1] in Expression_Config.escaped_chars:
+            if len(pattern) > 1 and pattern[1] in env.escape:
                 # here we only return the escaped charater as a literal, later the literal will be identified by this
                 return (Exp_Retval.OK, pattern[1], pattern[2:])
             return (Exp_Retval.INVALEXPR, exp, "")

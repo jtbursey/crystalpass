@@ -82,7 +82,7 @@ def run_wizard():
     else:
         dialogue.info("The wizard is already open.")
 
-def update_guide():
+def update():
     pass
 
 def open_manual():

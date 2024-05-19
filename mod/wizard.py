@@ -5,6 +5,7 @@ import string
 import mod.dialogue as dialogue
 import mod.common as common
 from mod.environment import Environment as env
+import mod.expression as exp
 
 class Wizard:
     window : tk.Tk
@@ -32,7 +33,7 @@ class Wizard:
 
     def menu_reset():
         for i in range(Wizard.max_args):
-            Wizard.set_ent(i, "Unused:", "", "disabled")
+            Wizard.set_ent(i, "      -", "", "disabled")
 
     def menu_selected(sel):
         match sel:
@@ -44,7 +45,7 @@ class Wizard:
             case "Digit":
                 Wizard.set_ent(0, "Length:", "1", "normal")
                 Wizard.set_ent(1, "Range/Set:", "0-9", "normal")
-                Wizard.set_ent(2, "Unused:", "", "disabled")
+                Wizard.set_ent(2, "      -", "", "disabled")
                 Wizard.set_ent(3, "Name:", "", "normal")
             case "Letter":
                 Wizard.set_ent(0, "Length:", "1", "normal")
@@ -54,23 +55,23 @@ class Wizard:
             case "Symbol":
                 Wizard.set_ent(0, "Length:", "1", "normal")
                 Wizard.set_ent(1, "Range/Set:", env.symbolSet, "normal")
-                Wizard.set_ent(2, "Unused:", "", "disabled")
+                Wizard.set_ent(2, "      -", "", "disabled")
                 Wizard.set_ent(3, "Name:", "", "normal")
             case "Character":
                 Wizard.set_ent(0, "Length:", "1", "normal")
                 Wizard.set_ent(1, "Range/Set:", env.symbolSet + string.ascii_letters + string.digits, "normal")
-                Wizard.set_ent(2, "Unused:", "", "disabled")
+                Wizard.set_ent(2, "      -", "", "disabled")
                 Wizard.set_ent(3, "Name:", "", "normal")
             case "Named":
                 Wizard.set_ent(0, "Name:", "", "normal")
                 Wizard.set_ent(1, "Reverse:", "False", "normal")
                 Wizard.set_ent(2, "Regen:", "False", "normal")
-                Wizard.set_ent(3, "Unused:", "", "disabled")
+                Wizard.set_ent(3, "      -", "", "disabled")
             case "Literal":
                 Wizard.set_ent(0, "Literal:", "", "normal")
-                Wizard.set_ent(1, "Unused:", "", "disabled")
-                Wizard.set_ent(2, "Unused:", "", "disabled")
-                Wizard.set_ent(3, "Unused:", "", "disabled")
+                Wizard.set_ent(1, "      -", "", "disabled")
+                Wizard.set_ent(2, "      -", "", "disabled")
+                Wizard.set_ent(3, "      -", "", "disabled")
             case _ :
                 Wizard.menu_reset()
 
@@ -177,7 +178,7 @@ class Wizard:
                     if count > 0:
                         output += ","
                     count += 1
-                    output += '"' + s + '"'
+                    output += '"' + exp.escape(s) + '"'
                 elif not all(x in string.punctuation for x in s):
                     dialogue.warn(title="Invalid", msg="Invalid symbol set!")
                     return ""
@@ -195,7 +196,7 @@ class Wizard:
                     if count > 0:
                         output += ","
                     count += 1
-                    output += '"' + s + '"'
+                    output += '"' + exp.escape(s) + '"'
                 elif not all(x in string.punctuation + string.ascii_letters + string.digits for x in s):
                     dialogue.warn(title="Invalid", msg="Invalid character set!")
                     return ""
@@ -205,7 +206,7 @@ class Wizard:
                 if n != "" and all(x in string.ascii_letters + string.digits for x in n):
                     count += 1
                     output += "n="+n
-                elif not all(x in string.ascii_letters + string.digits for x in n):
+                elif not all(x in string.ascii_letters + string.digits for x in n) or n == "":
                     dialogue.warn(title="Invalid", msg="Invalid name value!")
                     return ""
                 rev = Wizard.var_list[1].get()
@@ -272,7 +273,7 @@ class Wizard:
         Wizard.ent_list = []
         Wizard.lbl_list = []
         for i in range(Wizard.max_args):
-            Wizard.lbl_list.append(tk.Label(master=Wizard.fr_argin, font=Wizard.font, text="Unused:", bg="white"))
+            Wizard.lbl_list.append(tk.Label(master=Wizard.fr_argin, font=Wizard.font, text="      -", bg="white"))
             Wizard.ent_list.append(tk.Entry(master=Wizard.fr_argin, textvariable=Wizard.var_list[i], relief=tk.RIDGE, borderwidth=3, bg="white", state="disabled"))
             Wizard.ent_list[-1].configure(font=Wizard.font)
             Wizard.lbl_list[-1].grid(row=i+1, column=0, sticky="e")
