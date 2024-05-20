@@ -257,6 +257,7 @@ class Wizard:
         Wizard.window.wm_title("Wizard")
         Wizard.window.attributes('-topmost', 'true')
         Wizard.window.resizable(width=False, height=False)
+        Wizard.window.bind("<Return>", (lambda event: Wizard.close()))
         
         Wizard.fr_mst = tk.Frame(master=Wizard.window, borderwidth=3, bg="white")
         Wizard.fr_mst.pack(fill=tk.BOTH, expand=True)
