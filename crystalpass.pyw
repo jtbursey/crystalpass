@@ -37,6 +37,9 @@ class Window:
 
     wizard_open = False
 
+    ent_feedback = [("Very Weak", "Red"), ("Weak", "OrangeRed"), ("Reasonable", "Yellow"), ("Good", "Green"), ("Strong", "LawnGreen"), ("Very Strong", "Lime")]
+    sassy_feedback = [("I already guessed it.", "Red"), ("Good job. It sucks.", "OrangeRed"), ("meh.", "Yellow"), ("Try harder.", "Green"), ("Dece... Deez Nutz!", "LawnGreen"), ("Nerd!", "Lime")]
+
 def write_txt(lines : List[str], txt : tk.Text):
     txt.configure(state='normal')
     txt.delete(0.0, tk.END)
@@ -61,6 +64,37 @@ def init():
 # Action Functions
 # =============================
 
+def update():
+    pattern = Window.input.get()
+    if pattern == "":
+        Window.lbl_meter.configure(text="Meter", bg="lightgrey")
+        return
+    err, exprs, t = exp.do_parse(pattern, Window.ent_pattern_input.index(tk.INSERT), True)
+    if err < 0:
+        return
+    ent = 0
+    for e in exprs:
+        ent += e.entropy()
+    ent = round(ent, 2)
+    rank = 0
+    if ent <= 28:
+        pass
+    elif ent <= 35:
+        rank = 1
+    elif ent < 60:
+        rank = 2
+    elif ent <= 90:
+        rank = 3
+    elif ent <= 127:
+        rank = 4
+    elif ent > 127:
+        rank = 5
+    feedback = Window.ent_feedback
+    if env.sassy:
+        feedback = Window.sassy_feedback
+    Window.lbl_meter.configure(text=str(ent)+" bits - "+feedback[rank][0], bg=feedback[rank][1])
+    # update quick guide
+
 def generate_password():
     pattern = Window.input.get()
     if pattern == "":
@@ -79,11 +113,9 @@ def run_wizard():
         Window.wizard_open = False
         app = Window.input.get()
         Window.input.set(app + output)
+        update()
     else:
         dialogue.info("The wizard is already open.")
-
-def update():
-    pass
 
 def open_manual():
     dialogue.info(msg="This will open the manual")
@@ -166,6 +198,8 @@ def window_launch():
     Window.ent_pattern_input.configure(font=Window.font)
     Window.ent_pattern_input.pack(fill=tk.X, side=tk.LEFT, anchor=tk.CENTER, padx=4, pady=4, expand=True)
     Window.ent_pattern_input.bind("<Return>", (lambda event: generate_password()))
+    Window.ent_pattern_input.bind("<KeyRelease>", (lambda event: update()))
+    Window.ent_pattern_input.bind("<ButtonRelease-1>", (lambda event: update()))
 
     # wizard button
     Window.btn_wizard = tk.Button(master=Window.lf_input, text="Wizard", height=1, width=10, relief=tk.RAISED, borderwidth=3, command=run_wizard)
@@ -176,7 +210,7 @@ def window_launch():
     Window.lf_meter.pack(fill=tk.NONE, side=tk.TOP, padx=4, pady=20, expand=False)
 
     # UI feedback for password strength
-    Window.lbl_meter = tk.Label(master=Window.lf_meter, width=40, text="Meter", bg="red")
+    Window.lbl_meter = tk.Label(master=Window.lf_meter, width=40, text="Meter", bg="lightgrey")
     Window.lbl_meter.pack(fill=tk.NONE, side=tk.TOP, padx=4, pady=4, expand=False)
 
     # frame to hold the input and wizard

@@ -1,5 +1,6 @@
 import string
 import secrets
+import math
 from enum import IntEnum
 from typing import List, Tuple
 
@@ -67,10 +68,7 @@ class Exp_Word:
         self.caps = c
         self.subs = s
     
-    def entropy(self) -> float:
-        return 0.0
-
-    def generate(self) -> str:
+    def get_wl(self) -> List[str]:
         wl = []
         if self.length == None:
             for l in env.wordlists:
@@ -79,6 +77,18 @@ class Exp_Word:
         else:
             for x in self.length.get():
                 wl += env.wordlists[x-1]
+        return wl
+
+    def entropy(self) -> float:
+        ent = len(self.get_wl())
+        if ent == 0:
+            return 0
+        if self.caps == Quad.TRUE:
+            ent *= 2**(float(sum(self.length.get()))/float(len(self.length.get())))
+        return math.log(ent, 2)
+
+    def generate(self) -> str:
+        wl = self.get_wl()
         if len(wl) == 0:
             return ""
         word = secrets.choice(wl)
@@ -105,7 +115,10 @@ class Exp_Digit:
         self.set = s
     
     def entropy(self) -> float:
-        return 0.0
+        ent = float(len(self.set)**(float(sum(self.length.get()))/float(len(self.length.get()))))
+        if ent <= 0:
+            ent = 1.0
+        return math.log(ent, 2)
 
     def generate(self) -> str:
         digit = ""
@@ -125,7 +138,13 @@ class Exp_Letter:
         self.caps = c
     
     def entropy(self) -> float:
-        return 0.0
+        num = len(self.set)
+        if self.caps:
+            num *= 2
+        ent = float(num**(float(sum(self.length.get()))/float(len(self.length.get()))))
+        if ent <= 0:
+            ent = 1.0
+        return math.log(ent, 2)
 
     def generate(self) -> str:
         chars = ""
@@ -154,7 +173,10 @@ class Exp_Symbol:
         self.set = s
     
     def entropy(self) -> float:
-        return 0.0
+        ent = float(len(self.set)**(float(sum(self.length.get()))/float(len(self.length.get()))))
+        if ent <= 0:
+            ent = 1.0
+        return math.log(ent, 2)
 
     def generate(self) -> str:
         syms = ""
@@ -173,7 +195,10 @@ class Exp_Character:
         self.set = s
     
     def entropy(self) -> float:
-        return 0.0
+        ent = float(len(self.set)**(float(sum(self.length.get()))/float(len(self.length.get()))))
+        if ent <= 0:
+            ent = 1.0
+        return math.log(ent, 2)
 
     def generate(self) -> str:
         chars = ""
@@ -194,7 +219,9 @@ class Exp_Named:
         self.regen = reg
     
     def entropy(self) -> float:
-        return Names.map[self.name].entropy()
+        if self.regen:
+            return Names.map[self.name].entropy()
+        return 0.0
 
     def generate(self) -> str:
         gen = ""
@@ -517,6 +544,8 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
 
         match t:
             case Exp_Type.WORD:
+                if length == None:
+                    length = Range(3, len(env.wordlists))
                 if caps == None:
                     caps = Quad.FALSE
                 if subs == None:
@@ -606,19 +635,32 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
     
     return (Exp_Retval.OK, exp)
 
-def parse(pattern : str, quiet : bool = False) -> Tuple[Exp_Retval, List[Expression]]:
+def do_parse(pattern : str, index : int = 0, quiet : bool = False) -> Tuple[Exp_Retval, List[Expression], Exp_Type]:
     elist = []
+    t = Exp_Type.NONE
+    if index >= len(pattern):
+        index = len(pattern)-1
     while len(pattern) != 0:
         ret, expr, pattern = get_next_exp_string(pattern)
         if ret < 0:
-            return (ret, expr)
+            return (ret, expr, t)
         elif ret == Exp_Retval.EMPTY:
             break
         ret, exp = parse_exp_string(expr, quiet)
         if ret < 0:
-            return (ret, exp)
+            return (ret, exp, t)
+        if index <= len(expr) and t == Exp_Type.NONE:
+            t = exp.type
+        else:
+            index -= len(expr)
         elist.append(exp)
-    return (ret, elist)
+    if t == Exp_Type.NONE:
+        t = elist[-1].type
+    return (ret, elist, t)
+
+def parse(pattern : str, quiet : bool = False) -> Tuple[Exp_Retval, List[Expression]]:
+    err, l, _ = do_parse(pattern, quiet)
+    return (err, l)
 
 def validate(pattern : str) -> Exp_Retval:
     ret, _ = parse(pattern, True)

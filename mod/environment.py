@@ -3,10 +3,11 @@ import string
 
 class Environment:
     tutorial=True
+    sassy=False
     wordlists = []
     blocklist = []
     addlist = []
-    capsFreq = 0.2
+    capsFreq = 0.3
     escape = '\\'
     symbolSet = string.punctuation
     wordlist_file = os.path.join("resources", "common-english-clean.txt")
