@@ -11,7 +11,7 @@ from mod.environment import Environment as env
 
 import mod.dialogue as dialogue
 
-class Exp_Retval(IntEnum):
+class Retval(IntEnum):
     EMPTY = 1
     OK = 0
     ERR = -1
@@ -23,7 +23,7 @@ class Exp_Retval(IntEnum):
     EXTRAARG = -7
     NOARG = -8
 
-class Exp_Type(IntEnum):
+class Type(IntEnum):
     NONE = 0
     WORD = 1
     DIGIT = 2
@@ -255,7 +255,7 @@ class Exp_Literal:
 
 class Expression:
     def __init__(self) -> None:
-        self.type = Exp_Type.NONE
+        self.type = Type.NONE
         self.exp = Exp_None()
         self.name = None
     
@@ -268,33 +268,33 @@ class Expression:
 
 # this seems like a better idea than globals
 class Exp_Globals:
-    expression_names = [(Exp_Type.WORD, "word"), (Exp_Type.DIGIT, "digit"), (Exp_Type.LETTER, "letter"), (Exp_Type.SYMBOL, "symbol"), (Exp_Type.CHARACTER, "character"), (Exp_Type.NAMED, "named")]
+    expression_names = [(Type.WORD, "word"), (Type.DIGIT, "digit"), (Type.LETTER, "letter"), (Type.SYMBOL, "symbol"), (Type.CHARACTER, "character"), (Type.NAMED, "named")]
     arg_names = ["length", "caps", "subs", "name", "regen", "reverse"]
     quad_map = [(Quad.TRUE, "true"), (Quad.FALSE, "false"), (Quad.BEGIN, "begin"), (Quad.END, "end")]
     bool_map = [(True, "true"), (False, "false")]
     quad_dict = {Quad.TRUE : "True", Quad.FALSE : "False", Quad.BEGIN : "Begin", Quad.END : "End"}
     escaped_chars = env.escape + "[]\""
 
-def longest_val_match(val : str, map) -> Tuple[Exp_Retval, any]:
+def longest_val_match(val : str, map) -> Tuple[Retval, any]:
     matches = [v for v in map if v[1].startswith(val.lower())]
     if len(matches) > 1:
-        return (Exp_Retval.AMBIG, val)
+        return (Retval.AMBIG, val)
     elif len(matches) == 0:
-        return (Exp_Retval.INVALARG, val)
-    return (Exp_Retval.OK, matches[0][0])
+        return (Retval.INVALARG, val)
+    return (Retval.OK, matches[0][0])
 
-def longest_arg_match(arg : str) -> Tuple[Exp_Retval, str]:
+def longest_arg_match(arg : str) -> Tuple[Retval, str]:
     matches = [an for an in Exp_Globals.arg_names if an.startswith(arg)]
     if len(matches) > 1:
-        return (Exp_Retval.AMBIG, arg)
+        return (Retval.AMBIG, arg)
     elif len(matches) == 0:
-        return (Exp_Retval.INVALARG, arg)
-    return (Exp_Retval.OK, matches[0])
+        return (Retval.INVALARG, arg)
+    return (Retval.OK, matches[0])
 
-def longest_exp_substring(pattern : str) -> Tuple[Exp_Type, str]:
-    best = (Exp_Type.NONE, "")
+def longest_exp_substring(pattern : str) -> Tuple[Type, str]:
+    best = (Type.NONE, "")
     if pattern == env.escape:
-        return (Exp_Type.NONE, "")
+        return (Type.NONE, "")
 
     for i in range(1, len(pattern)+1):
         for w in Exp_Globals.expression_names:
@@ -302,16 +302,16 @@ def longest_exp_substring(pattern : str) -> Tuple[Exp_Type, str]:
                 best = (w[0], pattern[0:i])
     return best
 
-def find_exp_parity(pattern : str, l = '[', r = ']') -> Tuple[Exp_Retval, str]:
+def find_exp_parity(pattern : str, l = '[', r = ']') -> Tuple[Retval, str]:
     if len(pattern) == 0 or pattern[0] != l:
-        return (Exp_Retval.OK, "")
+        return (Retval.OK, "")
     
     pos1 = 1
     par = 1
     while par != 0:
         pos2 = common.find_first_of(pattern[pos1:], "[]")
         if pos2 == None:
-            return (Exp_Retval.INVALARG, pattern)
+            return (Retval.INVALARG, pattern)
         pos1 += pos2
         if pattern[pos1] == ']' and pattern[pos1-1] != env.escape:
             par -= 1
@@ -319,7 +319,7 @@ def find_exp_parity(pattern : str, l = '[', r = ']') -> Tuple[Exp_Retval, str]:
             par += 1
         pos1 += 1
 
-    return (Exp_Retval.OK, pattern[0:pos1])
+    return (Retval.OK, pattern[0:pos1])
 
 def escape(s : str) -> str:
     new = ""
@@ -332,34 +332,34 @@ def escape(s : str) -> str:
             new += c
     return new
 
-def get_next_exp_string(pattern : str) -> Tuple[Exp_Retval, str, str]:
+def get_next_exp_string(pattern : str) -> Tuple[Retval, str, str]:
     if len(pattern) == 0:
-        return (Exp_Retval.EMPTY, "", "")
+        return (Retval.EMPTY, "", "")
 
     if pattern.startswith(env.escape):
         # dealing with possible expression
         if len(pattern) == 1:
-            return (Exp_Retval.INVALSYMBOL, pattern, "")
+            return (Retval.INVALSYMBOL, pattern, "")
 
         _, exp = longest_exp_substring(pattern)
         if len(exp) == 1:
             if len(pattern) > 1 and pattern[1] in env.escape:
                 # here we only return the escaped charater as a literal, later the literal will be identified by this
-                return (Exp_Retval.OK, pattern[1], pattern[2:])
-            return (Exp_Retval.INVALEXPR, exp, "")
+                return (Retval.OK, pattern[1], pattern[2:])
+            return (Retval.INVALEXPR, exp, "")
         
         rem = find_exp_parity(pattern[len(exp):])
         if rem[0] < 0:
             return (rem[0], rem[1], pattern[len(exp)+len(rem):])
         rem = rem[1]
-        return (Exp_Retval.OK, pattern[0:len(exp)+len(rem)], pattern[len(exp)+len(rem):])
+        return (Retval.OK, pattern[0:len(exp)+len(rem)], pattern[len(exp)+len(rem):])
 
     pos1 = common.find_first_of(pattern, env.escape)
     if pos1 == None:
-        return (Exp_Retval.OK, pattern[0:], "")
-    return (Exp_Retval.OK, pattern[0:pos1], pattern[pos1:])
+        return (Retval.OK, pattern[0:], "")
+    return (Retval.OK, pattern[0:pos1], pattern[pos1:])
 
-def get_set(arg_list : List[str]) -> Tuple[Exp_Retval, List[str]]:
+def get_set(arg_list : List[str]) -> Tuple[Retval, List[str]]:
     # Don't flame me for this. I was really tired.
     s = []
     esc = False
@@ -373,7 +373,7 @@ def get_set(arg_list : List[str]) -> Tuple[Exp_Retval, List[str]]:
             s1 += '"'
             a = a[1:]
         elif first and not a.startswith('"'):
-            return (Exp_Retval.INVALARG, s)
+            return (Retval.INVALARG, s)
         for i in range(len(a)):
             last = False
             if not esc and a[i] == env.escape:
@@ -383,16 +383,16 @@ def get_set(arg_list : List[str]) -> Tuple[Exp_Retval, List[str]]:
                 s1 += a[i]
                 s.append(s1)
                 if i < len(a.rstrip())-1:
-                    return (Exp_Retval.INVALARG, s)
-                return (Exp_Retval.OK, s)
+                    return (Retval.INVALARG, s)
+                return (Retval.OK, s)
             if esc and a[i] == '"':
                 last = True
             s1 += a[i]
             esc = False
         s.append(s1)
     if last:
-        return (Exp_Retval.INVALARG, s)
-    return (Exp_Retval.OK, s)
+        return (Retval.INVALARG, s)
+    return (Retval.OK, s)
 
 def get_next_arg(arg_list : List[str], quiet : bool = False) -> Tuple[Arg_Type, str, any, List[str]]:
     arg_list[0] = arg_list[0].lstrip()
@@ -429,7 +429,7 @@ def get_next_arg(arg_list : List[str], quiet : bool = False) -> Tuple[Arg_Type, 
         return (Arg_Type.AMBIG, arg[0], '='.join(arg), rem)
 
     err, an = longest_arg_match(arg[0].strip())
-    if err == Exp_Retval.AMBIG:
+    if err == Retval.AMBIG:
         return (Arg_Type.AMBIG, an, arg[0], rem)
     elif err < 0:
         return (Arg_Type.INVALID, an, arg[0], rem)
@@ -456,16 +456,16 @@ def get_next_arg(arg_list : List[str], quiet : bool = False) -> Tuple[Arg_Type, 
 
     return (Arg_Type.INVALID, None, '='.join(arg), rem)
 
-def get_args(args : List[str], quiet : bool = False) -> Tuple[Exp_Retval, any]:
+def get_args(args : List[str], quiet : bool = False) -> Tuple[Retval, any]:
     length = caps = subs = set = None
     name = reverse = regen = None
     dup = None
     while len(args) > 0 and (len(args) != 1 or len(args[0]) != 0):
         at, an, val, args =  get_next_arg(args, quiet)
         if at == Arg_Type.AMBIG:
-            return (Exp_Retval.AMBIG, val)
+            return (Retval.AMBIG, val)
         elif at < 0:
-            return (Exp_Retval.INVALARG, val)
+            return (Retval.INVALARG, val)
     
         if an == "length":
             if length == None:
@@ -509,16 +509,16 @@ def get_args(args : List[str], quiet : bool = False) -> Tuple[Exp_Retval, any]:
                 else:
                     dup = "range"
         else:
-            return (Exp_Retval.INVALARG, an)
+            return (Retval.INVALARG, an)
 
         if dup != None:
             if not quiet and env.tutorial:
                 dialogue.warn(title="Duplicate Argument", msg="A duplicate "+dup+" was provided. Ignoring.")
             dup = None
     
-    return (Exp_Retval.OK, (length, caps, subs, set, name, reverse, regen))
+    return (Retval.OK, (length, caps, subs, set, name, reverse, regen))
 
-def make_word(exp : Expression, length : Range, caps : Quad, subs : bool) -> Tuple[Exp_Retval, Expression]:
+def make_word(exp : Expression, length : Range, caps : Quad, subs : bool) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(3, len(env.wordlists))
     if caps == None:
@@ -528,21 +528,21 @@ def make_word(exp : Expression, length : Range, caps : Quad, subs : bool) -> Tup
     exp.exp = Exp_Word(length, caps, subs)
     if exp.name != None:
         Names.map[exp.name] = exp
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def make_digit(exp : Expression, length : Range, set : str) -> Tuple[Exp_Retval, Expression]:
+def make_digit(exp : Expression, length : Range, set : str) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(1)
     if set == None:
         set = ''.join([str(x) for x in Range(0, 9).get()])
     if not all(x in string.digits for x in set):
-        return (Exp_Retval.INVALARG, set)
+        return (Retval.INVALARG, set)
     exp.exp = Exp_Digit(length, set)
     if exp.name != None:
         Names.map[exp.name] = exp
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def make_letter(exp : Expression, length : Range, set : str, caps : bool, quiet : bool = False) -> Tuple[Exp_Retval, Expression]:
+def make_letter(exp : Expression, length : Range, set : str, caps : bool, quiet : bool = False) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(1)
     if set == None:
@@ -554,58 +554,58 @@ def make_letter(exp : Expression, length : Range, set : str, caps : bool, quiet 
             dialogue.warn(title="Invalid Caps Value", msg="Caps value for a letter should be true or false. Using true.")
         caps = True
     if not all(x in string.ascii_letters for x in set):
-        return (Exp_Retval.INVALARG, set)
+        return (Retval.INVALARG, set)
     exp.exp = Exp_Letter(length, set, caps)
     if exp.name != None:
         Names.map[exp.name] = exp
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def make_symbol(exp : Expression, length : Range, set : str) -> Tuple[Exp_Retval, Expression]:
+def make_symbol(exp : Expression, length : Range, set : str) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(1)
     if set == None:
         set = env.symbolSet
     if not all(x in string.punctuation for x in set):
-        return (Exp_Retval.INVALARG, set)
+        return (Retval.INVALARG, set)
     exp.exp = Exp_Symbol(length, set)
     if exp.name != None:
         Names.map[exp.name] = exp
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def make_character(exp : Expression, length : Range, set : str) -> Tuple[Exp_Retval, Expression]:
+def make_character(exp : Expression, length : Range, set : str) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(1)
     if set == None:
         set = env.symbolSet + string.ascii_letters + string.digits
     if not all(x in string.punctuation + string.ascii_letters + string.digits for x in set):
-        return (Exp_Retval.INVALARG, set)
+        return (Retval.INVALARG, set)
     exp.exp = Exp_Character(length, set)
     if exp.name != None:
         Names.map[exp.name] = exp
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def make_named(exp : Expression, name : str, reverse : bool, regen : bool) -> Tuple[Exp_Retval, Expression]:
+def make_named(exp : Expression, name : str, reverse : bool, regen : bool) -> Tuple[Retval, Expression]:
     exp.name = None
     if name == None:
-        return (Exp_Retval.NOARG, "\\named[name=?]")
+        return (Retval.NOARG, "\\named[name=?]")
     if reverse == None:
         reverse = False
     if regen == None:
         regen = False
     exp.exp = Exp_Named(name, reverse, regen)
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, Expression]:
+def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Retval, Expression]:
     exp = Expression()
     if len(exp_str) == 0:
-        return (Exp_Retval.EMPTY, exp)
+        return (Retval.EMPTY, exp)
 
     if exp_str.startswith(env.escape):
         t, n = longest_exp_substring(exp_str)
-        if t == Exp_Type.NONE:
-            exp.type = Exp_Type.LITERAL
+        if t == Type.NONE:
+            exp.type = Type.LITERAL
             exp.exp = Exp_Literal(exp_str)
-            return (Exp_Retval.OK, exp)
+            return (Retval.OK, exp)
         
         exp.type = t
 
@@ -626,71 +626,71 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
         if name != None:
             exp.name = name
 
-        if t == Exp_Type.WORD:
+        if t == Type.WORD:
             if set != None or reverse != None or regen != None:
-                return (Exp_Retval.EXTRAARG, str([set, reverse, regen]))
+                return (Retval.EXTRAARG, str([set, reverse, regen]))
             return make_word(exp, length, caps, subs)
-        elif t == Exp_Type.DIGIT:
+        elif t == Type.DIGIT:
             if caps != None or subs != None or reverse != None or regen != None:
-                return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
+                return (Retval.EXTRAARG, str([caps, subs, reverse, regen]))
             return make_digit(exp, length, set)
-        elif t == Exp_Type.LETTER:
+        elif t == Type.LETTER:
             if subs != None or reverse != None or regen != None:
-                return (Exp_Retval.EXTRAARG, str([subs, reverse, regen]))
+                return (Retval.EXTRAARG, str([subs, reverse, regen]))
             return make_letter(exp, length, set, caps, quiet)
-        elif t == Exp_Type.SYMBOL:
+        elif t == Type.SYMBOL:
             if caps != None or subs != None or reverse != None or regen != None:
-                return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
+                return (Retval.EXTRAARG, str([caps, subs, reverse, regen]))
             return make_symbol(exp, length, set)
-        elif t == Exp_Type.CHARACTER:
+        elif t == Type.CHARACTER:
             if caps != None or subs != None or reverse != None or regen != None:
-                return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
+                return (Retval.EXTRAARG, str([caps, subs, reverse, regen]))
             return make_character(exp, length, set)
-        elif t == Exp_Type.NAMED:
+        elif t == Type.NAMED:
             if length != None or set != None or caps != None or subs != None:
-                return (Exp_Retval.EXTRAARG, str([length, set, caps, subs]))
+                return (Retval.EXTRAARG, str([length, set, caps, subs]))
             return make_named(exp, name, reverse, regen)
         else:
-            return (Exp_Retval.INVALEXPR, n)
+            return (Retval.INVALEXPR, n)
 
     else:
-        exp.type = Exp_Type.LITERAL
+        exp.type = Type.LITERAL
         exp.exp = Exp_Literal(exp_str)
     
-    return (Exp_Retval.OK, exp)
+    return (Retval.OK, exp)
 
-def do_parse(pattern : str, index : int = 0, quiet : bool = False) -> Tuple[Exp_Retval, List[Expression], Exp_Type]:
+def do_parse(pattern : str, index : int = 0, quiet : bool = False) -> Tuple[Retval, List[Expression], Type]:
     elist = []
-    t = Exp_Type.NONE
+    t = Type.NONE
     if index >= len(pattern):
         index = len(pattern)-1
     while len(pattern) != 0:
         ret, expr, pattern = get_next_exp_string(pattern)
         if ret < 0:
             return (ret, expr, t)
-        elif ret == Exp_Retval.EMPTY:
+        elif ret == Retval.EMPTY:
             break
         ret, exp = parse_exp_string(expr, quiet)
         if ret < 0:
             return (ret, exp, t)
-        if index <= len(expr) and t == Exp_Type.NONE:
+        if index <= len(expr) and t == Type.NONE:
             t = exp.type
         else:
             index -= len(expr)
         elist.append(exp)
-    if t == Exp_Type.NONE:
+    if t == Type.NONE:
         t = elist[-1].type
     return (ret, elist, t)
 
-def parse(pattern : str, quiet : bool = False) -> Tuple[Exp_Retval, List[Expression]]:
+def parse(pattern : str, quiet : bool = False) -> Tuple[Retval, List[Expression]]:
     err, l, _ = do_parse(pattern, quiet)
     return (err, l)
 
-def validate(pattern : str) -> Exp_Retval:
+def validate(pattern : str) -> Retval:
     ret, _ = parse(pattern, True)
     return ret
 
-def generate(pattern : str) -> Tuple[Exp_Retval, str]:
+def generate(pattern : str) -> Tuple[Retval, str]:
     ret, exprs = parse(pattern)
     if ret < 0:
         return (ret, exprs)
@@ -699,7 +699,7 @@ def generate(pattern : str) -> Tuple[Exp_Retval, str]:
     for e in exprs:
         gen = e.generate()
         if gen == None:
-            return (Exp_Retval.ERR, "Generation Error")
+            return (Retval.ERR, "Generation Error")
         if e.name != None:
             Names.generated[e.name] = gen
         password += gen
@@ -707,18 +707,18 @@ def generate(pattern : str) -> Tuple[Exp_Retval, str]:
     Names.map.clear()
     return (ret, password)
 
-def handle_err(err : Exp_Retval, txt : str):
-    if err == Exp_Retval.INVALARG:
+def handle_err(err : Retval, txt : str):
+    if err == Retval.INVALARG:
         dialogue.err(title="Invalid Argument", msg="Invalid argument:\n"+txt)
-    elif err == Exp_Retval.INVALEXPR:
+    elif err == Retval.INVALEXPR:
         dialogue.err(title="Invalid Expression", msg="Invalid expression:\n"+txt)
-    elif err == Exp_Retval.INVALSYMBOL:
+    elif err == Retval.INVALSYMBOL:
         dialogue.err(title="Invalid Symbol", msg="Invalid symbol:\n"+txt)
-    elif err == Exp_Retval.AMBIG:
+    elif err == Retval.AMBIG:
         dialogue.err(title="Ambiguous Expression", msg="Ambiguous expression:\n"+txt)
-    elif err == Exp_Retval.EXTRAARG:
+    elif err == Retval.EXTRAARG:
         dialogue.err(title="Extra Argument", msg="Extra argument:\n"+txt)
-    elif err == Exp_Retval.NOARG:
+    elif err == Retval.NOARG:
         dialogue.err(title="Missing Argument", msg="Missing argument:\n"+txt)
     elif int(err) < 0:
         dialogue.err(title="Invalid Pattern", msg="Failed to parse pattern:\n"+txt)
@@ -726,7 +726,7 @@ def handle_err(err : Exp_Retval, txt : str):
 def get_explanation(exprs : List[Expression]) -> List[str]:
     lines = []
     for e in exprs:
-        if e.type == Exp_Type.WORD:
+        if e.type == Type.WORD:
             if e.exp.length == None:
                 l = "Any"
             else:
@@ -736,34 +736,34 @@ def get_explanation(exprs : List[Expression]) -> List[str]:
                           "   Use Capitals:            " + Exp_Globals.quad_dict[e.exp.caps],
                           "   Use ASCII Substitutions: " + str(e.exp.subs)
                          ]
-        elif e.type == Exp_Type.DIGIT:
+        elif e.type == Type.DIGIT:
             lines += ["Expression Type: Digit",
                       "   Possible lengths: " + str(e.exp.length.get()),
                       "   Possible digits:  " + e.exp.set
                      ]
-        elif e.type == Exp_Type.LETTER:
+        elif e.type == Type.LETTER:
             lines += ["Expression Type: Letter",
                       "   Possible lengths: " + str(e.exp.length.get()),
                       "   Possible letters: " + e.exp.set,
                       "   Use caps: " + str(e.exp.caps)
                      ]
-        elif e.type == Exp_Type.SYMBOL:
+        elif e.type == Type.SYMBOL:
             lines += ["Expression Type: Symbol",
                       "   Possible lengths: " + str(e.exp.length.get()),
                       "   Possible symbols: " + e.exp.set
                      ]
-        elif e.type == Exp_Type.CHARACTER:
+        elif e.type == Type.CHARACTER:
             lines += ["Expression Type: Character",
                       "   Possible lengths: " + str(e.exp.length.get()),
                       "   Possible symbols: " + e.exp.set
                      ]
-        elif e.type == Exp_Type.NAMED:
+        elif e.type == Type.NAMED:
             lines += ["Expression Type: Named Reference",
                       "   Reference:             " + e.exp.name,
                       "   Reverse expression:    " + str(e.exp.reverse),
                       "   Regenerate expression: " + str(e.exp.regen)
                      ]
-        elif e.type == Exp_Type.LITERAL:
+        elif e.type == Type.LITERAL:
             lines += ["Expression Type: Literal",
                       "   Value: " + e.exp.literal
                      ]
