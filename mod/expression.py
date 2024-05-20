@@ -7,7 +7,6 @@ from typing import List, Tuple
 from mod.range import Range
 from mod.range import parse_range
 import mod.common as common
-import mod.entropy as entropy
 from mod.environment import Environment as env
 
 import mod.dialogue as dialogue
