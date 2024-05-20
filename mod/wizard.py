@@ -36,201 +36,199 @@ class Wizard:
             Wizard.set_ent(i, "      -", "", "disabled")
 
     def menu_selected(sel):
-        match sel:
-            case "Word":
-                Wizard.set_ent(0, "Length:", "Any", "normal")
-                Wizard.set_ent(1, "Caps:", "False", "normal")
-                Wizard.set_ent(2, "Subs:", "False", "normal")
-                Wizard.set_ent(3, "Name:", "", "normal")
-            case "Digit":
-                Wizard.set_ent(0, "Length:", "1", "normal")
-                Wizard.set_ent(1, "Range/Set:", "0-9", "normal")
-                Wizard.set_ent(2, "      -", "", "disabled")
-                Wizard.set_ent(3, "Name:", "", "normal")
-            case "Letter":
-                Wizard.set_ent(0, "Length:", "1", "normal")
-                Wizard.set_ent(1, "Range/Set:", "a-z", "normal")
-                Wizard.set_ent(2, "Caps:", "False", "normal")
-                Wizard.set_ent(3, "Name:", "", "normal")
-            case "Symbol":
-                Wizard.set_ent(0, "Length:", "1", "normal")
-                Wizard.set_ent(1, "Range/Set:", env.symbolSet, "normal")
-                Wizard.set_ent(2, "      -", "", "disabled")
-                Wizard.set_ent(3, "Name:", "", "normal")
-            case "Character":
-                Wizard.set_ent(0, "Length:", "1", "normal")
-                Wizard.set_ent(1, "Range/Set:", env.symbolSet + string.ascii_letters + string.digits, "normal")
-                Wizard.set_ent(2, "      -", "", "disabled")
-                Wizard.set_ent(3, "Name:", "", "normal")
-            case "Named":
-                Wizard.set_ent(0, "Name:", "", "normal")
-                Wizard.set_ent(1, "Reverse:", "False", "normal")
-                Wizard.set_ent(2, "Regen:", "False", "normal")
-                Wizard.set_ent(3, "      -", "", "disabled")
-            case "Literal":
-                Wizard.set_ent(0, "Literal:", "", "normal")
-                Wizard.set_ent(1, "      -", "", "disabled")
-                Wizard.set_ent(2, "      -", "", "disabled")
-                Wizard.set_ent(3, "      -", "", "disabled")
-            case _ :
-                Wizard.menu_reset()
+        if sel == "Word":
+            Wizard.set_ent(0, "Length:", "Any", "normal")
+            Wizard.set_ent(1, "Caps:", "False", "normal")
+            Wizard.set_ent(2, "Subs:", "False", "normal")
+            Wizard.set_ent(3, "Name:", "", "normal")
+        elif sel == "Digit":
+            Wizard.set_ent(0, "Length:", "1", "normal")
+            Wizard.set_ent(1, "Range/Set:", "0-9", "normal")
+            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(3, "Name:", "", "normal")
+        elif sel == "Letter":
+            Wizard.set_ent(0, "Length:", "1", "normal")
+            Wizard.set_ent(1, "Range/Set:", "a-z", "normal")
+            Wizard.set_ent(2, "Caps:", "False", "normal")
+            Wizard.set_ent(3, "Name:", "", "normal")
+        elif sel == "Symbol":
+            Wizard.set_ent(0, "Length:", "1", "normal")
+            Wizard.set_ent(1, "Range/Set:", env.symbolSet, "normal")
+            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(3, "Name:", "", "normal")
+        elif sel == "Character":
+            Wizard.set_ent(0, "Length:", "1", "normal")
+            Wizard.set_ent(1, "Range/Set:", env.symbolSet + string.ascii_letters + string.digits, "normal")
+            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(3, "Name:", "", "normal")
+        elif sel == "Named":
+            Wizard.set_ent(0, "Name:", "", "normal")
+            Wizard.set_ent(1, "Reverse:", "False", "normal")
+            Wizard.set_ent(2, "Regen:", "False", "normal")
+            Wizard.set_ent(3, "      -", "", "disabled")
+        elif sel == "Literal":
+            Wizard.set_ent(0, "Literal:", "", "normal")
+            Wizard.set_ent(1, "      -", "", "disabled")
+            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(3, "      -", "", "disabled")
+        else:
+            Wizard.menu_reset()
 
     def read(sel) -> str:
         output = ""
         count = 0
-        match sel:
-            case "Word":
-                output = "\\w["
-                l = Wizard.var_list[0].get()
-                if l != "Any" and l != "":
-                    count += 1
-                    output += "l="+l
-                c = Wizard.var_list[1].get()
-                if "true".startswith(c.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "c=t"
-                elif "begin".startswith(c.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "c=b"
-                elif "end".startswith(c.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "c=e"
-                elif not "false".startswith(c.lower()):
-                    dialogue.warn(title="Invalid", msg="Invalid caps value!")
-                    return ""
-                s = Wizard.var_list[2].get()
-                if "true".startswith(s.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "s=t"
-                elif not "false".startswith(s.lower()):
-                    dialogue.warn(title="Invalid", msg="Invalid subs value!")
-                    return ""
-            case "Digit":
-                output = "\\d["
-                l = Wizard.var_list[0].get()
-                if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
-                    count += 1
-                    output += "l="+l
-                elif not all(x in string.digits + "-" for x in l):
-                    dialogue.warn(title="Invalid", msg="Invalid length!")
-                    return ""
-                s = Wizard.var_list[1].get()
-                if s != "0-9" and all(x in string.digits + "-" for x in s):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    if all(x in string.digits for x in s):
-                        output += '"' + s + '"'
-                    else:
-                        output += s
-                elif not all(x in string.digits + "-" for x in s):
-                    dialogue.warn(title="Invalid", msg="Invalid digit set!")
-                    return ""
-            case "Letter":
-                output = "\\l["
-                l = Wizard.var_list[0].get()
-                if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
-                    count += 1
-                    output += "l="+l
-                elif not all(x in string.digits + "-" for x in l):
-                    dialogue.warn(title="Invalid", msg="Invalid length!")
-                    return ""
-                s = Wizard.var_list[1].get()
-                if s != "a-z" and all(x in string.ascii_letters + "-" for x in s):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    if all(x in string.ascii_letters for x in s):
-                        output += '"' + s.lower() + '"'
-                    else:
-                        output += s.lower()
-                elif not all(x in string.ascii_letters + "-" for x in s):
-                    dialogue.warn(title="Invalid", msg="Invalid letter set!")
-                    return ""
-                c = Wizard.var_list[2].get()
-                if "true".startswith(c.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "c=t"
-                elif not "false".startswith(c.lower()):
-                    dialogue.warn(title="Invalid", msg="Invalid caps value!")
-                    return ""
-            case "Symbol":
-                output = "\\s["
-                l = Wizard.var_list[0].get()
-                if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
-                    count += 1
-                    output += "l="+l
-                elif not all(x in string.digits + "-" for x in l):
-                    dialogue.warn(title="Invalid", msg="Invalid length!")
-                    return ""
-                s = Wizard.var_list[1].get()
-                if s != string.punctuation and all(x in string.punctuation for x in s):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += '"' + exp.escape(s) + '"'
-                elif not all(x in string.punctuation for x in s):
-                    dialogue.warn(title="Invalid", msg="Invalid symbol set!")
-                    return ""
-            case "Character":
-                output = "\\c["
-                l = Wizard.var_list[0].get()
-                if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
-                    count += 1
-                    output += "l="+l
-                elif not all(x in string.digits + "-" for x in l):
-                    dialogue.warn(title="Invalid", msg="Invalid length!")
-                    return ""
-                s = Wizard.var_list[1].get()
-                if s != env.symbolSet + string.ascii_letters + string.digits and all(x in string.punctuation + string.ascii_letters + string.digits for x in s):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += '"' + exp.escape(s) + '"'
-                elif not all(x in string.punctuation + string.ascii_letters + string.digits for x in s):
-                    dialogue.warn(title="Invalid", msg="Invalid character set!")
-                    return ""
-            case "Named":
-                output = "\\n["
-                n = Wizard.var_list[0].get()
-                if n != "" and all(x in string.ascii_letters + string.digits for x in n):
-                    count += 1
-                    output += "n="+n
-                elif not all(x in string.ascii_letters + string.digits for x in n) or n == "":
-                    dialogue.warn(title="Invalid", msg="Invalid name value!")
-                    return ""
-                rev = Wizard.var_list[1].get()
-                if "true".startswith(rev.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "rev=t"
-                elif not "false".startswith(rev.lower()):
-                    dialogue.warn(title="Invalid", msg="Invalid reverse value!")
-                    return ""
-                reg = Wizard.var_list[2].get()
-                if "true".startswith(reg.lower()):
-                    if count > 0:
-                        output += ","
-                    count += 1
-                    output += "reg=t"
-                elif not "false".startswith(reg.lower()):
-                    dialogue.warn(title="Invalid", msg="Invalid regen value!")
-                    return ""
-            case "Literal":
-                output = Wizard.var_list[0].get()
-            case _ :
+        if sel == "Word":
+            output = "\\w["
+            l = Wizard.var_list[0].get()
+            if l != "Any" and l != "":
+                count += 1
+                output += "l="+l
+            c = Wizard.var_list[1].get()
+            if "true".startswith(c.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "c=t"
+            elif "begin".startswith(c.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "c=b"
+            elif "end".startswith(c.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "c=e"
+            elif not "false".startswith(c.lower()):
+                dialogue.warn(title="Invalid", msg="Invalid caps value!")
                 return ""
+            s = Wizard.var_list[2].get()
+            if "true".startswith(s.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "s=t"
+            elif not "false".startswith(s.lower()):
+                dialogue.warn(title="Invalid", msg="Invalid subs value!")
+                return ""
+        elif sel == "Digit":
+            output = "\\d["
+            l = Wizard.var_list[0].get()
+            if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
+                count += 1
+                output += "l="+l
+            elif not all(x in string.digits + "-" for x in l):
+                dialogue.warn(title="Invalid", msg="Invalid length!")
+                return ""
+            s = Wizard.var_list[1].get()
+            if s != "0-9" and all(x in string.digits + "-" for x in s):
+                if count > 0:
+                    output += ","
+                count += 1
+                if all(x in string.digits for x in s):
+                    output += '"' + s + '"'
+                else:
+                    output += s
+            elif not all(x in string.digits + "-" for x in s):
+                dialogue.warn(title="Invalid", msg="Invalid digit set!")
+                return ""
+        elif sel == "Letter":
+            output = "\\l["
+            l = Wizard.var_list[0].get()
+            if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
+                count += 1
+                output += "l="+l
+            elif not all(x in string.digits + "-" for x in l):
+                dialogue.warn(title="Invalid", msg="Invalid length!")
+                return ""
+            s = Wizard.var_list[1].get()
+            if s != "a-z" and all(x in string.ascii_letters + "-" for x in s):
+                if count > 0:
+                    output += ","
+                count += 1
+                if all(x in string.ascii_letters for x in s):
+                    output += '"' + s.lower() + '"'
+                else:
+                    output += s.lower()
+            elif not all(x in string.ascii_letters + "-" for x in s):
+                dialogue.warn(title="Invalid", msg="Invalid letter set!")
+                return ""
+            c = Wizard.var_list[2].get()
+            if "true".startswith(c.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "c=t"
+            elif not "false".startswith(c.lower()):
+                dialogue.warn(title="Invalid", msg="Invalid caps value!")
+                return ""
+        elif sel == "Symbol":
+            output = "\\s["
+            l = Wizard.var_list[0].get()
+            if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
+                count += 1
+                output += "l="+l
+            elif not all(x in string.digits + "-" for x in l):
+                dialogue.warn(title="Invalid", msg="Invalid length!")
+                return ""
+            s = Wizard.var_list[1].get()
+            if s != string.punctuation and all(x in string.punctuation for x in s):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += '"' + exp.escape(s) + '"'
+            elif not all(x in string.punctuation for x in s):
+                dialogue.warn(title="Invalid", msg="Invalid symbol set!")
+                return ""
+        elif sel == "Character":
+            output = "\\c["
+            l = Wizard.var_list[0].get()
+            if l != "1" and l != "" and all(x in string.digits + "-" for x in l):
+                count += 1
+                output += "l="+l
+            elif not all(x in string.digits + "-" for x in l):
+                dialogue.warn(title="Invalid", msg="Invalid length!")
+                return ""
+            s = Wizard.var_list[1].get()
+            if s != env.symbolSet + string.ascii_letters + string.digits and all(x in string.punctuation + string.ascii_letters + string.digits for x in s):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += '"' + exp.escape(s) + '"'
+            elif not all(x in string.punctuation + string.ascii_letters + string.digits for x in s):
+                dialogue.warn(title="Invalid", msg="Invalid character set!")
+                return ""
+        elif sel == "Named":
+            output = "\\n["
+            n = Wizard.var_list[0].get()
+            if n != "" and all(x in string.ascii_letters + string.digits for x in n):
+                count += 1
+                output += "n="+n
+            elif not all(x in string.ascii_letters + string.digits for x in n) or n == "":
+                dialogue.warn(title="Invalid", msg="Invalid name value!")
+                return ""
+            rev = Wizard.var_list[1].get()
+            if "true".startswith(rev.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "rev=t"
+            elif not "false".startswith(rev.lower()):
+                dialogue.warn(title="Invalid", msg="Invalid reverse value!")
+                return ""
+            reg = Wizard.var_list[2].get()
+            if "true".startswith(reg.lower()):
+                if count > 0:
+                    output += ","
+                count += 1
+                output += "reg=t"
+            elif not "false".startswith(reg.lower()):
+                dialogue.warn(title="Invalid", msg="Invalid regen value!")
+                return ""
+        elif sel == "Literal":
+            output = Wizard.var_list[0].get()
+        else:
+            return ""
         name = Wizard.var_list[-1].get()
         if name != "" and all(x in string.ascii_letters + string.digits for x in name):
             if count > 0:

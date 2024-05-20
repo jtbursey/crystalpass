@@ -488,50 +488,49 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
             elif at < 0:
                 return (Exp_Retval.INVALARG, val)
         
-            match an:
-                case "length":
-                    if length == None:
-                        length = val
+            if an == "length":
+                if length == None:
+                    length = val
+                else:
+                    dup = "length"
+            elif an == "caps":
+                if caps == None:
+                    caps = val
+                else:
+                    dup = "caps value"
+            elif an == "subs":
+                if subs == None:
+                    subs = val
+                else:
+                    dup = "subs value"
+            elif an == "name":
+                if name == None:
+                    name = val
+                else:
+                    dup = "name"
+            elif an == "reverse":
+                if reverse == None:
+                    reverse = val
+                else:
+                    dup = "reverse value"
+            elif an == "regen":
+                if regen == None:
+                    regen = val
+                else:
+                    dup = "regen value"
+            elif an == None:
+                if at == Arg_Type.SET:
+                    if set == None:
+                        set = val
                     else:
-                        dup = "length"
-                case "caps":
-                    if caps == None:
-                        caps = val
+                        dup = "set"
+                elif at == Arg_Type.RANGE:
+                    if set == None:
+                        set = ''.join([str(x) for x in val.get()])
                     else:
-                        dup = "caps value"
-                case "subs":
-                    if subs == None:
-                        subs = val
-                    else:
-                        dup = "subs value"
-                case "name":
-                    if name == None:
-                        name = val
-                    else:
-                        dup = "name"
-                case "reverse":
-                    if reverse == None:
-                        reverse = val
-                    else:
-                        dup = "reverse value"
-                case "regen":
-                    if regen == None:
-                        regen = val
-                    else:
-                        dup = "regen value"
-                case None:
-                    if at == Arg_Type.SET:
-                        if set == None:
-                            set = val
-                        else:
-                            dup = "set"
-                    elif at == Arg_Type.RANGE:
-                        if set == None:
-                            set = ''.join([str(x) for x in val.get()])
-                        else:
-                            dup = "range"
-                case _:
-                    return (Exp_Retval.INVALARG, an)
+                        dup = "range"
+            else:
+                return (Exp_Retval.INVALARG, an)
 
             if dup != None:
                 if not quiet and env.tutorial:
@@ -541,92 +540,91 @@ def parse_exp_string(exp_str : str, quiet : bool = False) -> Tuple[Exp_Retval, E
         if name != None:
             exp.name = name
 
-        match t:
-            case Exp_Type.WORD:
-                if length == None:
-                    length = Range(3, len(env.wordlists))
-                if caps == None:
-                    caps = Quad.FALSE
-                if subs == None:
-                    subs = False
-                if set != None or reverse != None or regen != None:
-                    return (Exp_Retval.EXTRAARG, str([set, reverse, regen]))
-                exp.exp = Exp_Word(length, caps, subs)
-                if exp.name != None:
-                    Names.map[exp.name] = exp
-                return (Exp_Retval.OK, exp)
-            case Exp_Type.DIGIT:
-                if length == None:
-                    length = Range(1)
-                if set == None:
-                    set = ''.join([str(x) for x in Range(0, 9).get()])
-                if caps != None or subs != None or reverse != None or regen != None:
-                    return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
-                if not all(x in string.digits for x in set):
-                    return (Exp_Retval.INVALARG, set)
-                exp.exp = Exp_Digit(length, set)
-                if exp.name != None:
-                    Names.map[exp.name] = exp
-                return (Exp_Retval.OK, exp)
-            case Exp_Type.LETTER:
-                if length == None:
-                    length = Range(1)
-                if set == None:
-                    set = string.ascii_lowercase
-                if caps == None:
-                    caps = False
-                elif caps in [Quad.BEGIN, Quad.END]:
-                    if not quiet and env.tutorial:
-                        dialogue.warn(title="Invalid Caps Value", msg="Caps value for a letter should be true or false. Using true.")
-                    caps = False
-                if subs != None or reverse != None or regen != None:
-                    return (Exp_Retval.EXTRAARG, str([subs, reverse, regen]))
-                if not all(x in string.ascii_letters for x in set):
-                    return (Exp_Retval.INVALARG, set)
-                exp.exp = Exp_Letter(length, set, caps)
-                if exp.name != None:
-                    Names.map[exp.name] = exp
-                return (Exp_Retval.OK, exp)
-            case Exp_Type.SYMBOL:
-                if length == None:
-                    length = Range(1)
-                if set == None:
-                    set = env.symbolSet
-                if caps != None or subs != None or reverse != None or regen != None:
-                    return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
-                if not all(x in string.punctuation for x in set):
-                    return (Exp_Retval.INVALARG, set)
-                exp.exp = Exp_Symbol(length, set)
-                if exp.name != None:
-                    Names.map[exp.name] = exp
-                return (Exp_Retval.OK, exp)
-            case Exp_Type.CHARACTER:
-                if length == None:
-                    length = Range(1)
-                if set == None:
-                    set = env.symbolSet + string.ascii_letters + string.digits
-                if caps != None or subs != None or reverse != None or regen != None:
-                    return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
-                if not all(x in string.punctuation + string.ascii_letters + string.digits for x in set):
-                    return (Exp_Retval.INVALARG, set)
-                exp.exp = Exp_Character(length, set)
-                if exp.name != None:
-                    Names.map[exp.name] = exp
-                return (Exp_Retval.OK, exp)
-            case Exp_Type.NAMED:
-                exp.name = None
-                if name == None:
-                    return (Exp_Retval.NOARG, n + "[name=?]")
-                if reverse == None:
-                    reverse = False
-                if regen == None:
-                    regen = False
-                if length != None or set != None or caps != None or subs != None:
-                    return (Exp_Retval.EXTRAARG, str([length, set, caps, subs]))
-                exp.exp = Exp_Named(name, reverse, regen)
-                return (Exp_Retval.OK, exp)
-            case _:
-                return (Exp_Retval.INVALEXPR, n)
+        if t == Exp_Type.WORD:
+            if length == None:
+                length = Range(3, len(env.wordlists))
+            if caps == None:
+                caps = Quad.FALSE
+            if subs == None:
+                subs = False
+            if set != None or reverse != None or regen != None:
+                return (Exp_Retval.EXTRAARG, str([set, reverse, regen]))
+            exp.exp = Exp_Word(length, caps, subs)
+            if exp.name != None:
+                Names.map[exp.name] = exp
+            return (Exp_Retval.OK, exp)
+        elif t == Exp_Type.DIGIT:
+            if length == None:
+                length = Range(1)
+            if set == None:
+                set = ''.join([str(x) for x in Range(0, 9).get()])
+            if caps != None or subs != None or reverse != None or regen != None:
+                return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
+            if not all(x in string.digits for x in set):
+                return (Exp_Retval.INVALARG, set)
+            exp.exp = Exp_Digit(length, set)
+            if exp.name != None:
+                Names.map[exp.name] = exp
+            return (Exp_Retval.OK, exp)
+        elif t == Exp_Type.LETTER:
+            if length == None:
+                length = Range(1)
+            if set == None:
+                set = string.ascii_lowercase
+            if caps == None:
+                caps = False
+            elif caps in [Quad.BEGIN, Quad.END]:
+                if not quiet and env.tutorial:
+                    dialogue.warn(title="Invalid Caps Value", msg="Caps value for a letter should be true or false. Using true.")
+                caps = False
+            if subs != None or reverse != None or regen != None:
+                return (Exp_Retval.EXTRAARG, str([subs, reverse, regen]))
+            if not all(x in string.ascii_letters for x in set):
+                return (Exp_Retval.INVALARG, set)
+            exp.exp = Exp_Letter(length, set, caps)
+            if exp.name != None:
+                Names.map[exp.name] = exp
+            return (Exp_Retval.OK, exp)
+        elif t == Exp_Type.SYMBOL:
+            if length == None:
+                length = Range(1)
+            if set == None:
+                set = env.symbolSet
+            if caps != None or subs != None or reverse != None or regen != None:
+                return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
+            if not all(x in string.punctuation for x in set):
+                return (Exp_Retval.INVALARG, set)
+            exp.exp = Exp_Symbol(length, set)
+            if exp.name != None:
+                Names.map[exp.name] = exp
+            return (Exp_Retval.OK, exp)
+        elif t == Exp_Type.CHARACTER:
+            if length == None:
+                length = Range(1)
+            if set == None:
+                set = env.symbolSet + string.ascii_letters + string.digits
+            if caps != None or subs != None or reverse != None or regen != None:
+                return (Exp_Retval.EXTRAARG, str([caps, subs, reverse, regen]))
+            if not all(x in string.punctuation + string.ascii_letters + string.digits for x in set):
+                return (Exp_Retval.INVALARG, set)
+            exp.exp = Exp_Character(length, set)
+            if exp.name != None:
+                Names.map[exp.name] = exp
+            return (Exp_Retval.OK, exp)
+        elif t == Exp_Type.NAMED:
+            exp.name = None
+            if name == None:
+                return (Exp_Retval.NOARG, n + "[name=?]")
+            if reverse == None:
+                reverse = False
+            if regen == None:
+                regen = False
+            if length != None or set != None or caps != None or subs != None:
+                return (Exp_Retval.EXTRAARG, str([length, set, caps, subs]))
+            exp.exp = Exp_Named(name, reverse, regen)
+            return (Exp_Retval.OK, exp)
+        else:
+            return (Exp_Retval.INVALEXPR, n)
 
     else:
         exp.type = Exp_Type.LITERAL
@@ -701,48 +699,47 @@ def handle_err(err : Exp_Retval, txt : str):
 def get_explanation(exprs : List[Expression]) -> List[str]:
     lines = []
     for e in exprs:
-        match e.type:
-            case Exp_Type.WORD:
-                if e.exp.length == None:
-                    l = "Any"
-                else:
-                    l = str(e.exp.length.get())
+        if e.type == Exp_Type.WORD:
+            if e.exp.length == None:
+                l = "Any"
+            else:
+                l = str(e.exp.length.get())
                 lines += ["Expression Type: Word",
                           "   Possible word lengths:   " + l,
                           "   Use Capitals:            " + Expression_Config.quad_dict[e.exp.caps],
                           "   Use ASCII Substitutions: " + str(e.exp.subs)
                          ]
-            case Exp_Type.DIGIT:
-                lines += ["Expression Type: Digit",
-                          "   Possible lengths: " + str(e.exp.length.get()),
-                          "   Possible digits:  " + e.exp.set
-                         ]
-            case Exp_Type.LETTER:
-                lines += ["Expression Type: Letter",
-                          "   Possible lengths: " + str(e.exp.length.get()),
-                          "   Possible letters: " + e.exp.set,
-                          "   Use caps: " + str(e.exp.caps)
-                         ]
-            case Exp_Type.SYMBOL:
-                lines += ["Expression Type: Symbol",
-                          "   Possible lengths: " + str(e.exp.length.get()),
-                          "   Possible symbols: " + e.exp.set
-                         ]
-            case Exp_Type.CHARACTER:
-                lines += ["Expression Type: Character",
-                          "   Possible lengths: " + str(e.exp.length.get()),
-                          "   Possible symbols: " + e.exp.set
-                         ]
-            case Exp_Type.NAMED:
-                lines += ["Expression Type: Named Reference",
-                          "   Reference:             " + e.exp.name,
-                          "   Reverse expression:    " + str(e.exp.reverse),
-                          "   Regenerate expression: " + str(e.exp.regen)
-                         ]
-            case Exp_Type.LITERAL:
-                lines += ["Expression Type: Literal",
-                          "   Value: " + e.exp.literal
-                         ]
+        elif e.type == Exp_Type.DIGIT:
+            lines += ["Expression Type: Digit",
+                      "   Possible lengths: " + str(e.exp.length.get()),
+                      "   Possible digits:  " + e.exp.set
+                     ]
+        elif e.type == Exp_Type.LETTER:
+            lines += ["Expression Type: Letter",
+                      "   Possible lengths: " + str(e.exp.length.get()),
+                      "   Possible letters: " + e.exp.set,
+                      "   Use caps: " + str(e.exp.caps)
+                     ]
+        elif e.type == Exp_Type.SYMBOL:
+            lines += ["Expression Type: Symbol",
+                      "   Possible lengths: " + str(e.exp.length.get()),
+                      "   Possible symbols: " + e.exp.set
+                     ]
+        elif e.type == Exp_Type.CHARACTER:
+            lines += ["Expression Type: Character",
+                      "   Possible lengths: " + str(e.exp.length.get()),
+                      "   Possible symbols: " + e.exp.set
+                     ]
+        elif e.type == Exp_Type.NAMED:
+            lines += ["Expression Type: Named Reference",
+                      "   Reference:             " + e.exp.name,
+                      "   Reverse expression:    " + str(e.exp.reverse),
+                      "   Regenerate expression: " + str(e.exp.regen)
+                     ]
+        elif e.type == Exp_Type.LITERAL:
+            lines += ["Expression Type: Literal",
+                      "   Value: " + e.exp.literal
+                     ]
         if e.name != None:
             lines += ["   Expression Name: " + e.name]
         lines += [""]
