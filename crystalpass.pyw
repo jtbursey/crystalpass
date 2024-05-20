@@ -210,7 +210,7 @@ def window_launch():
     Window.lf_meter.pack(fill=tk.NONE, side=tk.TOP, padx=4, pady=20, expand=False)
 
     # UI feedback for password strength
-    Window.lbl_meter = tk.Label(master=Window.lf_meter, width=40, text="Meter", bg="lightgrey")
+    Window.lbl_meter = tk.Label(master=Window.lf_meter, width=40, text="Meter", bg="lightgrey", font=Window.font)
     Window.lbl_meter.pack(fill=tk.NONE, side=tk.TOP, padx=4, pady=4, expand=False)
 
     # frame to hold the input and wizard
