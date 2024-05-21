@@ -156,7 +156,7 @@ def window_launch():
     Window.master.unbind_all("<<NextWindow>>")
     Window.master.unbind_all("<Return>")
     # TODO: Get screen resolution and scale to that, also middle of screen
-    Window.master.geometry('1200x450')
+    Window.master.geometry('1200x480')
     Window.master.title("CrystalPass")
 
     Window.font = common.set_font()

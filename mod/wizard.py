@@ -22,6 +22,7 @@ class Wizard:
     var_list : List[tk.StringVar]
 
     button : tk.Button
+    do_return = False
 
     exp_types = ["None", "Word", "Digit", "Letter", "Symbol", "Character", "Named", "Literal"]
 
@@ -33,18 +34,18 @@ class Wizard:
 
     def menu_reset():
         for i in range(Wizard.max_args):
-            Wizard.set_ent(i, "      -", "", "disabled")
+            Wizard.set_ent(i, "         -", "", "disabled")
 
     def menu_selected(sel):
         if sel == "Word":
-            Wizard.set_ent(0, "Length:", "Any", "normal")
+            Wizard.set_ent(0, "   Length:", "Any", "normal")
             Wizard.set_ent(1, "Caps:", "False", "normal")
             Wizard.set_ent(2, "Subs:", "False", "normal")
             Wizard.set_ent(3, "Name:", "", "normal")
         elif sel == "Digit":
             Wizard.set_ent(0, "Length:", "1", "normal")
             Wizard.set_ent(1, "Range/Set:", "0-9", "normal")
-            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(2, "         -", "", "disabled")
             Wizard.set_ent(3, "Name:", "", "normal")
         elif sel == "Letter":
             Wizard.set_ent(0, "Length:", "1", "normal")
@@ -53,24 +54,24 @@ class Wizard:
             Wizard.set_ent(3, "Name:", "", "normal")
         elif sel == "Symbol":
             Wizard.set_ent(0, "Length:", "1", "normal")
-            Wizard.set_ent(1, "Range/Set:", env.symbolSet, "normal")
-            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(1, "Set:", env.symbolSet, "normal")
+            Wizard.set_ent(2, "         -", "", "disabled")
             Wizard.set_ent(3, "Name:", "", "normal")
         elif sel == "Character":
             Wizard.set_ent(0, "Length:", "1", "normal")
-            Wizard.set_ent(1, "Range/Set:", env.symbolSet + string.ascii_letters + string.digits, "normal")
-            Wizard.set_ent(2, "      -", "", "disabled")
+            Wizard.set_ent(1, "Set:", env.symbolSet + string.ascii_letters + string.digits, "normal")
+            Wizard.set_ent(2, "         -", "", "disabled")
             Wizard.set_ent(3, "Name:", "", "normal")
         elif sel == "Named":
             Wizard.set_ent(0, "Name:", "", "normal")
             Wizard.set_ent(1, "Reverse:", "False", "normal")
             Wizard.set_ent(2, "Regen:", "False", "normal")
-            Wizard.set_ent(3, "      -", "", "disabled")
+            Wizard.set_ent(3, "         -", "", "disabled")
         elif sel == "Literal":
             Wizard.set_ent(0, "Literal:", "", "normal")
-            Wizard.set_ent(1, "      -", "", "disabled")
-            Wizard.set_ent(2, "      -", "", "disabled")
-            Wizard.set_ent(3, "      -", "", "disabled")
+            Wizard.set_ent(1, "         -", "", "disabled")
+            Wizard.set_ent(2, "         -", "", "disabled")
+            Wizard.set_ent(3, "         -", "", "disabled")
         else:
             Wizard.menu_reset()
 
@@ -242,6 +243,7 @@ class Wizard:
         return output
 
     def close():
+        Wizard.do_return = True
         Wizard.window.destroy()
 
     def run(parent : tk.Tk) -> str:
@@ -272,7 +274,7 @@ class Wizard:
         Wizard.ent_list = []
         Wizard.lbl_list = []
         for i in range(Wizard.max_args):
-            Wizard.lbl_list.append(tk.Label(master=Wizard.fr_argin, font=Wizard.font, text="      -", bg="white"))
+            Wizard.lbl_list.append(tk.Label(master=Wizard.fr_argin, font=Wizard.font, text="         -", bg="white"))
             Wizard.ent_list.append(tk.Entry(master=Wizard.fr_argin, textvariable=Wizard.var_list[i], relief=tk.RIDGE, borderwidth=3, bg="white", state="disabled"))
             Wizard.ent_list[-1].configure(font=Wizard.font)
             Wizard.lbl_list[-1].grid(row=i+1, column=0, sticky="e")
@@ -282,5 +284,7 @@ class Wizard:
         Wizard.button.pack(side=tk.TOP, padx=4, pady=4, expand=False)
 
         Wizard.window.wait_window()
-        return Wizard.read(Wizard.menu_choice.get())
+        if Wizard.do_return:
+            return Wizard.read(Wizard.menu_choice.get())
+        return ""
 
