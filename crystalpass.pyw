@@ -10,6 +10,7 @@ import mod.wordlist as wordlist
 from mod.environment import Environment as env
 from manual.quick_guide import Quick_Guide as qg
 from mod.wizard import Wizard
+from manual.manual import Manual
 
 class Window:
     master : tk.Tk
@@ -36,6 +37,7 @@ class Window:
     btn_options : tk.Button
 
     wizard_open = False
+    manual_open = False
 
     ent_feedback = [("Very Weak", "Red"), ("Weak", "OrangeRed"), ("Reasonable", "Yellow"), ("Good", "Green"), ("Strong", "LawnGreen"), ("Very Strong", "Lime")]
     sassy_feedback = [("I already guessed it.", "Red"), ("Good job. It sucks.", "OrangeRed"), ("meh.", "Yellow"), ("Try harder.", "Green"), ("Dece... Deez Nutz!", "LawnGreen"), ("Nerd!", "Lime")]
@@ -120,7 +122,10 @@ def run_wizard():
         dialogue.info("The wizard is already open.")
 
 def open_manual():
-    dialogue.info(msg="This will open the manual")
+    if not Window.manual_open:
+        Window.manual_open = True
+        Manual.run(Window.master)
+        Window.manual_open = False
 
 def copy_to_clipboard():
     gen_pwd = Window.password.get()
