@@ -1,4 +1,5 @@
 from mod.environment import Environment as env
+from mod.expression import Type
 
 class Quick_Guide:
     default = [
@@ -19,5 +20,142 @@ class Quick_Guide:
         "",
         "Try '\word\symbol\word'",
         "",
-        "Open the manual below\nfor more info!"
+        "Open the manual below",
+        "for more info!"
     ]
+    word = [
+        "Word:",
+        "",
+        "Ex: \word[length=4-6, caps=true]",
+        "",
+        "\word[...]",
+        "   length : word length",
+        "   caps : true, false, begin, end",
+        "   subs : use ascii substitutions",
+        "",
+        "This expression generates a random",
+        "word. The 'length' argument can be",
+        "a range specifying the possible",
+        "word lengths (ex: 4-6 or 5). 'caps'",
+        "specifies whether to use random",
+        "capitals (true), capitalize the",
+        "first letter (begin), or the last",
+        "letter (end). 'subs' specifies",
+        "whether to use common ascii",
+        "subsitutions. (i.e. l33t)."
+    ]
+    digit = [
+        "Digit:",
+        "",
+        "Ex: \digit[length=2-3, 0-9]",
+        "",
+        "\digit[...]",
+        "   length : number length",
+        "   set : set of digits",
+        "",
+        "This expression generates a random",
+        "number of the given length, using",
+        "the given set of digits. 'length'",
+        "is the length of the number (ex:",
+        "2-3 or 2). The digit set is the set",
+        "of digits used to generate the",
+        "number. It can be given as either a",
+        "range (i.e. 0-9) or a set (i.e.",
+        "\"012345\"). The word 'set' is not",
+        "used."
+    ]
+    letter = [
+        "Letter:",
+        "",
+        "Ex: \letter[len=5, a-f, caps=true]",
+        "",
+        "\letter[...]",
+        "   length : number of letters",
+        "   set : set of letters to use",
+        "   caps : use capitals",
+        "",
+        "This expression generates a string",
+        "of random lowercase letters.",
+        "'length' specifies the number of",
+        "letters to use as a range (ie. 3-5)",
+        "or a number (ie. 4). The set is",
+        "given as either a range (a-f), or",
+        "a set of letters (\"abc\"). The word",
+        "'set' is not used. 'caps' specifies",
+        "whether to use random capital",
+        "letters as true or false."
+    ]
+    symbol = [
+        "Symbol:",
+        "",
+        "Ex: \symbol[length=2, \"!@#\"]",
+        "",
+        "\symbol[...]",
+        "   length : number of symbols",
+        "   set : set of symbols to use",
+        "",
+        "This expression generates a string",
+        "of random punctuation symbols.",
+        "'length' specifies the number of",
+        "symbols in the string given as",
+        "either a range (ie. 2-3) or number",
+        "(ie. 2). The set is given as a set",
+        "of symbols \"!@#\". There are over",
+        "30 symbols, so we recommend using",
+        "the default set (ie. left blank)."
+    ]
+    character = [
+        "Character:",
+        "",
+        "Ex: \character[length=2, \"aA1@#\"]",
+        "",
+        "\character[...]",
+        "   length : number of characters",
+        "   set : set of characters to use",
+        "",
+        "This expression generates a string",
+        "of random digits, symbols, upper,",
+        "and lowercase characters. 'length'",
+        "is the number of characters to use,",
+        "given as either a range (ie. 4-5)",
+        "or a number (ie. 6). The set is",
+        "given as a set of any valid ascii",
+        "character (ie. \"aA@#1\"). The word",
+        "'set' is not used. Since there are",
+        "so many characters, we recommend",
+        "using the default set (left blank)."
+    ]
+    named = [
+        "Named:",
+        "",
+        "Ex: \word[len=4-6, name=w]",
+        "    \\named[name=w, regen=true]",
+        "",
+        "\\named[...]",
+        "   name : the named expression",
+        "   reverse : reverse the expression",
+        "   regen : re-make the expression",
+        "",
+        "This is a special expression that",
+        "references another by name. Any of",
+        "the other expressions can have a",
+        "'name' argument to name it. The",
+        "'\\named' expression then uses that",
+        "same expression again. 'regen' will",
+        "use the same expression, but",
+        "regenerate it."
+    ]
+    literal = [
+        "Literal",
+        "",
+        "Ex: sometext",
+        "",
+        "Any text that is not part of an",
+        "expression will be treated as a",
+        "literal and copied exactly into the",
+        "resulting password. Note, literals",
+        "will not make your password more",
+        "secure."
+    ]
+
+    map = {Type.NONE : default, Type.WORD : word, Type.DIGIT : digit, Type.LETTER : letter, Type.SYMBOL : symbol, Type.CHARACTER : character, Type.NAMED : named, Type.LITERAL : literal}

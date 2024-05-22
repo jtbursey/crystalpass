@@ -94,6 +94,7 @@ def update():
         feedback = Window.sassy_feedback
     Window.lbl_meter.configure(text=str(ent)+" bits - "+feedback[rank][0], bg=feedback[rank][1])
     # update quick guide
+    write_txt(qg.map[t], Window.txt_guide)
 
 def generate_password():
     pattern = Window.input.get()
