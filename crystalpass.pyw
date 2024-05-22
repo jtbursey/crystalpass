@@ -95,6 +95,7 @@ def update():
     Window.lbl_meter.configure(text=str(ent)+" bits - "+feedback[rank][0], bg=feedback[rank][1])
     # update quick guide
     write_txt(qg.map[t], Window.txt_guide)
+    exp.clear_names()
 
 def generate_password():
     pattern = Window.input.get()
@@ -142,9 +143,7 @@ def explain_pattern():
     txt = tk.Text(master=explain, width=75, height=35, borderwidth=3, relief=tk.FLAT, bg="white", state='disabled')
     txt.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
     write_txt(lines, txt)
-
-def open_advanced_options():
-    dialogue.info(msg="This will open the advanced options")
+    exp.clear_names()
 
 # =============================
 # Window Loop
@@ -238,10 +237,6 @@ def window_launch():
     # run or rerun the results
     Window.btn_explain = tk.Button(master=Window.fr_entry_buttons, text="Explain", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=explain_pattern)
     Window.btn_explain.pack(side=tk.LEFT, padx=10, pady=20, expand=False)
-
-    # button to open the advanced options
-    Window.btn_options = tk.Button(master=Window.fr_entry_buttons, text="Adv. Options", height=2, width=20, relief=tk.RAISED, borderwidth=3, command=open_advanced_options)
-    Window.btn_options.pack(side=tk.LEFT, padx=10, pady=20, expand=False)
 
     init()
 

@@ -332,6 +332,10 @@ def escape(s : str) -> str:
             new += c
     return new
 
+def clear_names():
+    Names.generated.clear()
+    Names.map.clear()
+
 def get_next_exp_string(pattern : str) -> Tuple[Retval, str, str]:
     if len(pattern) == 0:
         return (Retval.EMPTY, "", "")
@@ -703,8 +707,7 @@ def generate(pattern : str) -> Tuple[Retval, str]:
         if e.name != None:
             Names.generated[e.name] = gen
         password += gen
-    Names.generated.clear()
-    Names.map.clear()
+    clear_names()
     return (ret, password)
 
 def handle_err(err : Retval, txt : str):
