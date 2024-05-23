@@ -67,6 +67,7 @@ def update():
     pattern = Window.input.get()
     if pattern == "":
         Window.lbl_meter.configure(text="Meter", bg="lightgrey")
+        write_txt(qg.map[exp.Type.NONE], Window.txt_guide)
         return
     err, exprs, t = exp.do_parse(pattern, Window.ent_pattern_input.index(tk.INSERT), True)
     if err < 0:
