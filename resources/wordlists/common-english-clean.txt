@@ -29657,8 +29657,6 @@ jabs
 jack
 jackal
 jackals
-jackass
-jackasses
 jackboot
 jackboots
 jackdaw
