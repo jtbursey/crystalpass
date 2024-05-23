@@ -75,7 +75,8 @@ class Exp_Word:
                     wl += l
         else:
             for x in self.length.get():
-                wl += env.wordlists[x-1]
+                if x < len(env.wordlists):
+                    wl += env.wordlists[x-1]
         return wl
 
     def entropy(self) -> float:
@@ -89,6 +90,8 @@ class Exp_Word:
     def generate(self) -> str:
         wl = self.get_wl()
         if len(wl) == 0:
+            if env.tutorial:
+                dialogue.warn(title="Empty Wordlist", msg="There are no words of the given lengths:\n"+str(self.length.get()))
             return ""
         word = secrets.choice(wl)
         if self.caps == Quad.TRUE:
@@ -525,6 +528,8 @@ def get_args(args : List[str], quiet : bool = False) -> Tuple[Retval, any]:
 def make_word(exp : Expression, length : Range, caps : Quad, subs : bool) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(3, len(env.wordlists))
+    if 0 in length.get():
+        length = Range(1, length.high)
     if caps == None:
         caps = Quad.FALSE
     if subs == None:

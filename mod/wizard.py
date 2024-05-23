@@ -253,6 +253,8 @@ class Wizard:
 
         Wizard.font = common.set_font()
 
+        Wizard.do_return = False
+
         Wizard.window = tk.Toplevel(parent)
         Wizard.window.wm_title("Wizard")
         Wizard.window.attributes('-topmost', 'true')
@@ -285,6 +287,7 @@ class Wizard:
 
         Wizard.window.wait_window()
         if Wizard.do_return:
+            Wizard.do_return = False
             return Wizard.read(Wizard.menu_choice.get())
         return ""
 
