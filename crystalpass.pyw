@@ -50,9 +50,6 @@ def write_txt(lines : List[str], txt : tk.Text):
     txt.configure(state='disabled')
 
 def init():
-    # get where we expect to be
-    selfpath = os.path.abspath(__file__)
-    os.chdir(os.path.dirname(selfpath))
     # Setup environment
     env.addlist = common.read_file_lines(env.addlist_file)
     env.blocklist = common.read_file_lines(env.blocklist_file)
@@ -126,6 +123,8 @@ def open_manual():
         Window.manual_open = True
         Manual.run(Window.master)
         Window.manual_open = False
+    else:
+        dialogue.info("The manual is already open.")
 
 def copy_to_clipboard():
     gen_pwd = Window.password.get()
@@ -155,6 +154,10 @@ def explain_pattern():
 # =============================
 
 def window_launch():
+    # get where we expect to be
+    selfpath = os.path.abspath(__file__)
+    os.chdir(os.path.dirname(selfpath))
+
     Window.master = tk.Tk()
     Window.master.unbind_all("<Tab>")
     Window.master.unbind_all("<<PrevWindow>>")

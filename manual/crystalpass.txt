@@ -1,0 +1,4 @@
+CrystalPass - Pattern-based password generator
+
+Welcome to the manual! With any luck, this little window will answer any questions you
+have about how to use CrystalPass and passwords in general.
