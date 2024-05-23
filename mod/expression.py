@@ -528,8 +528,10 @@ def get_args(args : List[str], quiet : bool = False) -> Tuple[Retval, any]:
 def make_word(exp : Expression, length : Range, caps : Quad, subs : bool) -> Tuple[Retval, Expression]:
     if length == None:
         length = Range(3, len(env.wordlists))
-    if 0 in length.get():
+    if 0 in length.get() and len(length.get()) > 1:
         length = Range(1, length.high)
+    elif 0 in length.get():
+        return (Retval.INVALARG, "word: length=0")
     if caps == None:
         caps = Quad.FALSE
     if subs == None:
@@ -717,19 +719,19 @@ def generate(pattern : str) -> Tuple[Retval, str]:
 
 def handle_err(err : Retval, txt : str):
     if err == Retval.INVALARG:
-        dialogue.err(title="Invalid Argument", msg="Invalid argument:\n"+txt)
+        dialogue.err(title="Invalid Argument", msg="Invalid argument:\n"+str(txt))
     elif err == Retval.INVALEXPR:
-        dialogue.err(title="Invalid Expression", msg="Invalid expression:\n"+txt)
+        dialogue.err(title="Invalid Expression", msg="Invalid expression:\n"+str(txt))
     elif err == Retval.INVALSYMBOL:
-        dialogue.err(title="Invalid Symbol", msg="Invalid symbol:\n"+txt)
+        dialogue.err(title="Invalid Symbol", msg="Invalid symbol:\n"+str(txt))
     elif err == Retval.AMBIG:
-        dialogue.err(title="Ambiguous Expression", msg="Ambiguous expression:\n"+txt)
+        dialogue.err(title="Ambiguous Expression", msg="Ambiguous expression:\n"+str(txt))
     elif err == Retval.EXTRAARG:
-        dialogue.err(title="Extra Argument", msg="Extra argument:\n"+txt)
+        dialogue.err(title="Extra Argument", msg="Extra argument:\n"+str(txt))
     elif err == Retval.NOARG:
-        dialogue.err(title="Missing Argument", msg="Missing argument:\n"+txt)
+        dialogue.err(title="Missing Argument", msg="Missing argument:\n"+str(txt))
     elif int(err) < 0:
-        dialogue.err(title="Invalid Pattern", msg="Failed to parse pattern:\n"+txt)
+        dialogue.err(title="Invalid Pattern", msg="Failed to parse pattern:\n"+str(txt))
 
 def get_explanation(exprs : List[Expression]) -> List[str]:
     lines = []
