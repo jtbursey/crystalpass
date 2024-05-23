@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import font
 
 import mod.common as common
-import mod.dialogue as dialogue
 
 class Manual:
     master : tk.Tk
@@ -31,7 +30,10 @@ class Manual:
     ]
 
     def update():
-        selected = Manual.sel.curselection()[0]
+        selected = Manual.sel.curselection()
+        if len(selected) == 0:
+            return
+        selected = selected[0]
         lines = common.read_file_lines(Manual.contents[selected][1])
         Manual.txt.configure(state='normal')
         Manual.txt.delete(0.0, tk.END)
