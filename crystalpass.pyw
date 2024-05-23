@@ -79,17 +79,17 @@ def update():
         ent += e.entropy()
     ent = round(ent, 2)
     rank = 0
-    if ent <= 28:
+    if ent <= 45:
         pass
-    elif ent <= 35:
+    elif ent <= 60:
         rank = 1
-    elif ent < 60:
+    elif ent < 70:
         rank = 2
-    elif ent <= 90:
+    elif ent <= 80:
         rank = 3
-    elif ent <= 127:
+    elif ent <= 100:
         rank = 4
-    elif ent > 127:
+    elif ent > 100:
         rank = 5
     feedback = Window.ent_feedback
     if env.sassy:
