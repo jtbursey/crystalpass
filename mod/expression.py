@@ -83,6 +83,9 @@ class Exp_Word:
         ent = len(self.get_wl())
         if ent == 0:
             return 0
+        if self.subs:
+            # this is a rough estimate if there are on average 4 swappable letters per word
+            ent *= 2**4
         if self.caps == Quad.TRUE:
             ent *= 2**(float(sum(self.length.get()))/float(len(self.length.get())))
         return math.log(ent, 2)
@@ -94,10 +97,18 @@ class Exp_Word:
                 dialogue.warn(title="Empty Wordlist", msg="There are no words of the given lengths:\n"+str(self.length.get()))
             return ""
         word = secrets.choice(wl)
+        if self.subs:
+            newword = ""
+            for l in word:
+                if l in Exp_Globals.subs_dict and secrets.SystemRandom().random() < env.subsFreq:
+                    newword += secrets.choice(Exp_Globals.subs_dict[l])
+                else:
+                    newword += l
+            word = newword
         if self.caps == Quad.TRUE:
             newword = ""
             for l in word:
-                if secrets.SystemRandom().random() < env.capsFreq:
+                if l in string.ascii_letters and secrets.SystemRandom().random() < env.capsFreq:
                     newword += l.upper()
                 else:
                     newword += l
@@ -106,9 +117,6 @@ class Exp_Word:
             word = word[0].upper() + word[1:]
         elif self.caps == Quad.END:
             word = word[:-1] + word[-1].upper()
-        
-        if self.subs:
-            dialogue.info(msg="Subs is not implemented yet")
         return word
 
 class Exp_Digit:
@@ -239,12 +247,9 @@ class Exp_Named:
             else:
                 dialogue.err(title="Unknown Named Reference", msg=self.name + " has not been generated yet. The referenced expression must come first.")
                 return None
-        
         if self.reverse:
             gen = gen[::-1]
-        
         return gen
-
 
 class Exp_Literal:
     def __init__(self, s : str = "") -> None:
@@ -276,6 +281,15 @@ class Exp_Globals:
     quad_map = [(Quad.TRUE, "true"), (Quad.FALSE, "false"), (Quad.BEGIN, "begin"), (Quad.END, "end")]
     bool_map = [(True, "true"), (False, "false")]
     quad_dict = {Quad.TRUE : "True", Quad.FALSE : "False", Quad.BEGIN : "Begin", Quad.END : "End"}
+    subs_dict = {"a" : "@4", 
+                 "b" : "8", 
+                 "e" : "3", 
+                 "i" : "1!", 
+                 "l" : "71", 
+                 "o" : "0", 
+                 "s" : "$5", 
+                 "t" : "+", 
+                 }
     escaped_chars = env.escape + "[]\""
 
 def longest_val_match(val : str, map) -> Tuple[Retval, any]:
