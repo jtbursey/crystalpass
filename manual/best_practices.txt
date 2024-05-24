@@ -1,0 +1,50 @@
+Best Practices
+
+    This page will cover the best practices of password use and management, as well as
+    some resources to help you out.
+
+CrystalPass is simply a password generator. It is able to provide certain guarantees
+about the strength of your generated password, but that's all. I do have ideas to improve
+it in the future, but the security of this project is limited by Python. It is still up
+to you to properly manager your passwords.
+
+First off, go get a password manager. As of May, 2024, I am using Bitwarden at the
+free tier and quite like it. There are paid options, but you likely don't need the
+features they are offering. All you need is something that will securely store your
+passwords in an organized manner. If you're a little more savy, you can host your own
+password manager server using PassBolt. I've looked into their project and really like
+what they're doing. Below are links to Bitwarden's and PassBolt's websites:
+
+    Bitwarden: https://bitwarden.com
+    PassBolt: https://www.passbolt.com
+
+As of May, 2024, I also recommend that you stay away from LastPass. They have a pretty
+bad track record of getting hacked (at least twice that I can remember), and that's the
+last thing you need to be worrying about.
+
+Having a password manager will make it much easier to have unique passwords for each
+account you own. This is also important because it limits the damage of an attacker
+cracking one of your accounts' passwords. Yes, they can correlate your accounts. In
+general, your passwords between accounts shouldn't even be similar. That is, if account
+A has the password "password" and account B has the password "password1". If one of those
+accounts gets hacked, the other will likely fall shortly after.
+
+While you are managing your passwords, you won't want one that has already been hacked.
+Even if it wasn't yours, hackers will try already known passwords first. You can mitigate
+this issue in two ways. First, if your password is ever leaked - hashed or not - change
+it. Even if you don't think it will get cracked for millions of years, there's no sense
+taking that risk. You have a password manager to help you anyways. The other thing you
+can do is to check if your password has appeared in a known breach. There is a very
+useful website called haveibeenpwned (https://haveibeenpwned.com/). It is a well known
+and trusted source that catalogues leaked passwords and accounts from known breaches.
+You can type in your password there to see if it has appeared in a breach. Please note
+that the list of passwords there is not complete, but can provide some good intial
+feedback.
+
+Next, whenever possible, use two factor authentication. It is never a bad idea and can
+stop hackers who have already guessed your password. Most password managers will come
+with some sort of authenticator built in, but there are plenty dedicated 2FA apps out
+there. Personally, I use Google authenticator for most of my accounts.
+
+Finally, you need to make strong passwords. That's where CrystalPass comes in! Details
+about how to use CrystalPass to generate strong passwords are in the following pages.

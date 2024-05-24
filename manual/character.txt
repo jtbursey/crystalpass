@@ -1,0 +1,17 @@
+Characters
+
+This expression generates a string of letters, digits, and symbols. The default set is:
+
+    !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+    0123456789
+
+Arguments:
+
+    length - The number of characters to generate. (i.e. length=2 would make '#@')
+
+    set - The set of characters to use.
+
+Remember to escape any of the special characters that you want to use in your set:
+'\\', '\[', '\]', '\"'.
+
+We recommend just using the default set as there are over 30 symbols to choose from.

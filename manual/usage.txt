@@ -1,0 +1,28 @@
+Usage
+
+    This page will cover the basics of using CrystalPass with some high-level examples.
+
+Alright, you've probably already figured out how to open CrystalPass and the manual, so
+let's dig into password generation!
+
+CrystalPass operates by parsing the text-based pattern that you provide it. For those who
+know, the pattern is roughly based on regular expressions. Each expression represents a
+set of symbols (i.e. letters, digits, words, etc.) that will be randomly chosen from when
+the password is generated. An example of a random word with a length between 4 and 6 is:
+
+    \word[length=4-6]
+
+Each expression type has its own page in the manual. Look around to see what you can use!
+
+Of course, writing regular expressions isn't the easiest way to go about creating
+passwords. To help with that, I have created a wizard. Simply open it up, select what
+type of expression you want next, and then select your arguments. Put multiple
+expressions back-to-back to create your pattern!
+
+    \word[length=4-6]\symbol\digit[length=2]
+
+Once you have settled on a pattern you like and is strong enough, press generate!
+
+Between uses of CrystalPass, you should be able to save your pattern in plaintext, though
+I have plans to encrypt it for you. If the entropy of the pattern is strong enough, an
+attacker shouldn't be able to guess it even knowing the pattern.

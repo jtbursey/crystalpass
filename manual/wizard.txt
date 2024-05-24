@@ -1,0 +1,14 @@
+Wizard
+
+    This page will cover how to use the wizard to make an expression.
+
+The wizard is meant to be as simple as possible.
+
+    1. Open it
+    2. Select the type of expression you want
+    3. Set your arguments
+    4. Make it!
+
+Wizard-created expressions are appended to the end of your current expression.
+
+To cancel wizard creation, just 'X' out of the window.

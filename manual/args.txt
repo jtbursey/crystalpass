@@ -1,0 +1,68 @@
+Arguments
+
+    This page will cover the different types of arguments and what values they can hold.
+
+Arguments directly follow an expression are are placed between the '[' and ']' brackets.
+Most arguments have a name (i.e. length) to tell the parser what to expect. The general
+form of an argument is 'arg=value' (i.e. length=4). Multiple arguments are comma
+delimited. Following is a list of each argument type and how to use them.
+
+length - Range
+
+    The length of an expression means one of two things. In the case of words, it refers
+    to the length of the word. In the case of letters, symbols, digits, etc., it refers
+    to the number of characters used in that expression.
+
+    In each case, the length can be a number (i.e. 4), or a range, delimited with a dash
+    (i.e. 4-6). The range contains every number between the upper and lower bound
+    inclusively. So 4-6 refers to the numbers 4, 5, and 6.
+
+caps - Quad/Bool
+
+    The caps option determines whether to use capital letters in either the '\letter'
+    or '\word' expression. In the case of '\letter', it can be 'true' or 'false' to
+    determine whether to use random capital letters or not. In the case of '\word' it can
+    additionally be 'begin' or 'end' to capitalize either the first or last letter of the
+    word.
+
+subs - Bool
+
+    In the case of '\word', subs can be either 'true' or 'false' to determine whether or
+    not to use common ascii substitutions, such as 'a' becoming '@'. The substitution is
+    random and occurs before capitalization.
+
+set - Set
+
+    A set of symbol, letters, and/or digits passed as an argument to an expression. The
+    set is denoted by double quotes (i.e. "abc"). There is no argument name for a set.
+    The set determines which characters the expression can choose from during generation.
+    If not determined, the default set is used.
+
+range - Range
+
+    In the case of '\digit' and '\letter' a range of either numbers or lowercase letters
+    can be used in place of a set. This determines the range of letters or digits that
+    the expression can choose from during generation. There is no argument name for a
+    range, just like set. Instead, simply put the range (i.e. 0-9 or a-z). If not
+    determined, the default range is used.
+
+name - string
+
+    In the case of most arguments, this argument simply names the expression. This name
+    alone does not affect the password generation. The name can be made up of letters and
+    numbers (i.e. name=myword1).
+
+    In the case of the '\named' expression (see Named page), name is the name of the
+    expression to be copied. The expression with the name must come before it is
+    referenced by the '\named' expression.
+
+reverse - Bool
+
+    For '\named' expressions, this option can the 'true' or 'false' to reverse the copied
+    expression without regenerating it.
+
+regen - Bool
+
+    For '\named' expressions, this option can be 'true' or 'false' to regenerate the
+    referenced expression at generation time. This acts as if the expression itself was
+    copied, not the result from generating it.

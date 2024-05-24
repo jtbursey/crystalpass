@@ -1,0 +1,23 @@
+Named
+
+This expression references another expression in the same pattern and with the same name.
+By default the '\named' expression will simply copy what the referenced expression
+generated.
+
+Example:
+
+    '\word[name=myword]\named[name=myword]' would generate 'pancakepancake'
+
+Arguments:
+
+    name - The name of the referenced expression. The referenced expression should have
+           this same argument with the same name, and must appear before the '\named'
+           expression.
+    
+    reverse - Can be 'true' or 'false' to reverse what the referenced expression
+              generated.
+    
+    regen - Can be 'true' or 'false' to regenerate the referenced expression using the
+            same arguments.
+
+Remember, the referenced expression must come before the '\named' expression.

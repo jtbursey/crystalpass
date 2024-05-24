@@ -1,0 +1,55 @@
+Expressions
+
+    This page will cover the syntax of expressions
+
+First off, every expression is denoted by a '\' character. This tells the parser that a
+new expression is beginning. Directly following the '\' is the type of expression. Say we
+want a word, we would write '\word'. This is the simplest form of expression.
+
+Any string of characters that is not an expression is treated as a literal. A literal is
+copied directly into the generated password. Since there is no entropy to a literal, it
+will not make your password any more secure.
+
+Optionally, you can put arguments after the expression. Arguments are denoted by
+brackets. Multiple arguments are comma separated:
+
+    \word[length=4, caps=true]
+
+Spaces also do not matter in arguments: 'length = 3 - 5' is the same as 'length=3-5'.
+
+Multiple expressions are meant to be put back-to-back. Any spaces in between expressions
+will be treated as literal spaces and appear in the resulting password.
+
+    '\word \word' would generate 'fluff big'
+
+    '\word\word' would generate 'fluffbig'
+
+Longest Substring Matching:
+
+    While parsing the pattern, CrystalPass uses longest substring matching for all of its
+    named expressions and arguments. This means you can use shorthand notation. Instead
+    of typing out '\word[length=4-6]', it is perfectly acceptable to type '\w[l=4-6].
+    Note, in some cases this will cause abiguity, but you will be warned about this.
+
+Escaped Characters:
+
+    For those who know about regular expressions, escape characters are commonplace.
+    Basically, an escape character is a special character that tells the parser that the
+    following symbol should be treated as its special meaning. For example '\n' is the
+    character representation of a 'newline'. Or \" means to literally print the "
+    chracter. I have done my best to minimize these special characters so you don't have
+    to think about them. Here's a short list of all of the special characters and when
+    they need to be escaped.
+
+    '\' - In the case you want have a literal '\' in your password, you would put '\\'
+          instead. This escapes the escape character. This case may also show up if you
+          want to explicitly have a set of symbols (see Symbol page) including '\'. Note,
+          as of now, this is the only character you need to escape outside of
+          expressions.
+    
+    '"' - The double quote character " is used to delimit sets of letters and symbols. So
+          if you want a set of symbols with " in it, you would type '\"'.
+    
+    '[]' - The brackets are used to denote the bounds of arguments '\word[...]'. As such,
+           if you have a collection of symbols including '[' and ']', they must be
+           escaped: '\[' '\]'.

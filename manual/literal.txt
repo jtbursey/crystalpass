@@ -1,0 +1,10 @@
+Literals
+
+A literal is any string of characters in your pattern that is not a part of an
+expression. Literals are copied directly into the generated password. As such, they to
+not add any entropy to the pattern or make your password more secure. They can, however,
+be fun to decorate your password.
+
+Example:
+
+    'my\word[]' would generate mypancake

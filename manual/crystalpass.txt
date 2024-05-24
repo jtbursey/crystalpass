@@ -1,4 +1,15 @@
 CrystalPass - Pattern-based password generator
 
+    This page will introduce you to the basics of CyrstalPass.
+
 Welcome to the manual! With any luck, this little window will answer any questions you
 have about how to use CrystalPass and passwords in general.
+
+The purpose of CrystalPass is to remove the trouble of coming up with your own password
+each time you make a new account or have to change your password for an existing account.
+The general idea is that you can come up with a pattern that you find somewhat easy to
+use, and then use that pattern to generate multiple passwords. Hopefully, those passwords
+will be easier to use the time comes.
+
+The follwoing pages will introduce passwords from cracking to best practices, and then
+the intricacies of how to use CrystalPass.

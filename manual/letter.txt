@@ -1,0 +1,16 @@
+Letter
+
+This expression generates a number of letters from the english alphabet.
+
+Arguments:
+
+    length - The number of letters to generate. (i.e. length=2 would make 'ab')
+
+    caps - Can be 'true' or 'false' to use random capital letters.
+
+    set/range - The set of lowercase letters to use. This can either be denoted as a set
+                (i.e. "12") or a range (i.e. 0-9). The words 'set' and 'range' are not
+                used.
+
+For range lengths, the length is chosen at random first, then that number of letterss are
+chosen at random.

@@ -1,0 +1,13 @@
+Digit
+
+This expression generates a string of base ten digits.
+
+Arguments:
+
+    length - The number of digits to generate. (i.e. length=2 would make '12')
+
+    set/range - The set of digits to use. This can either be denoted as a set (i.e. "12")
+                or a range (i.e. 0-9). The words 'set' and 'range' are not used.
+
+For range lengths, the length is chosen at random first, then that number of digits are
+chosen at random.

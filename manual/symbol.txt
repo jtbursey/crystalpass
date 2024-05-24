@@ -1,0 +1,16 @@
+Symbol
+
+This expression generates a string of puctuation. The default set is:
+
+    !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+
+Arguments:
+
+    length - The number of symbols to generate. (i.e. length=2 would make '#@')
+
+    set - The set of symbols to use.
+
+Remember to escape any of the special characters that you want to use in your set:
+'\\', '\[', '\]', '\"'.
+
+We recommend just using the default set as there are over 30 symbols to choose from.

@@ -1,0 +1,49 @@
+Password Cracking
+
+    This page will introduce the idea of password cracking at a high level and how that
+    becomes a threat model for this project.
+
+The point of a password is to keep other people out of your accounts, and to also keep
+those accounts "yours". By breaking into your accounts, an attack may be after your
+money (i.e. credit cards, bank accounts, etc.), the use of your accounts to compromise
+even more accounts by impersonating you, or simply to take over your account for their
+own use. In order to accomplish this, they will need to guess your password.
+
+Password guessing, or cracking, can be done in two scenarios: online and offline. In an
+online attack, the attacker attempts to directly login to your account through the online
+service (i.e. at the login page). If the website provider has good security practices,
+the attacker will likely have very few tries before they are flagged as suspicious and
+you, the account owner, are notified. This is great, however:
+
+    *** You should never trust the website provider to have perfect security ***
+
+Instead, trust yourself to have a strong enough password to withstand such attacks.
+
+Typically, websites will store user passwords as hashes. A hash is is a one-way
+mathematical function that takes your password, and turns it into seemingly random
+numbers. But hashes are also deterministic, meaning they will give the same output for
+the same input. So, when you try to login, your given password is hashed and then
+compared against the hashed password on-file for you.
+
+As an aside, passwords are typically hashed with what is called a salt. the salt is not
+a secret and is actually stored right next to the hashed password. What purpose does it
+served then? If someone (an attacker) is checking if a password matches any of the hashed
+passwords on-file, the salt forces them to re-hash the password for each different stored
+hash. Basically it wastes their time. And if there are enough users, it can slow an
+attacker down by several orders of magnitude.
+
+In short, your password is a potato that the website stores as hash browns. And it's even
+better with a little salt!
+
+So why does all this matter? In the case of an offline attack, the hashed-password
+database has been leaked to the public. In this scenario, the only thing standing between
+the hacker and your account is raw compute power - how fast they can churn out hashed
+guesses. For a motivated attacker, it is not hard to achieve 1 TH/s. That's one terahash,
+or 1 trillion hashes per second. To be clear:
+
+    *** A motivated attacker can guess 1 trillion passwords every second ***
+
+That is what you're up against.
+
+For our threat model, we assume an offline attacker who is aware of the pattern used to
+generate your password. As we will show, we can still make very strong passwords.

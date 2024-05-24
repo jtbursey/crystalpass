@@ -1,0 +1,17 @@
+Password Feedback - How to make strong passwords
+
+    This page will introduce at a high level the feedback channels in CrystalPass, and
+    how to use that feedback to make strong passwords.
+
+CrystalPass's main feedback channel is through entropy analysis and binned strength. The
+Entropy page explains in detail what entropy is, but at a high level, it is a measure of
+how complex your password is. It is measured in 'bits', and a higher number is better.
+The binned strength feedback tells you how strong your password is in words. I recommend
+that you aim for a 'Strong' password.
+
+Using CrystalPass, you will create a pattern from which the password will be generated.
+Since the generation process is completely random following from the pattern, CrystalPass
+is able to give feedback on the pattern itself. Furthermore, we can guarantee that this
+feedback is more accurate than generic feedback meters because of the generation process.
+The feedback is also based on a much stronger attacker: one who knows your pattern. Even
+so, a strong password will likely stand up to their attacks.

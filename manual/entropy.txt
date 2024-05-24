@@ -1,0 +1,56 @@
+Entropy - Password disorder
+
+    This page will cover in-depth what entropy is, how it is calculated, and how high
+    entropy stands up to an attacker.
+
+Entropy is a thermodynamic concept that measures the disorder of a system. In the case of
+passwords, we use entropy to measure the complexity of the password. The higher the
+entropy, the harder it is for an attacker to guess that password.
+
+The equation for password entropy is relatively simple: take the log base 2 of the total
+number of passwords (C) that could be the correct password.
+
+    E = log_2(C)
+
+However, calculating the total possible passwords C is not easy and will affect the
+result. Say you have a password made of entirely lowercase letters of length 8. Since we
+consider only lowercase letters, of which there are 26, and we have 8 of them, there are
+only 26^8 possible passwords or 2.08 * 10^11. That seems like a lot, but remember that an
+attacker can guess 10^12 passwords per second. Your password would get hacked in about a
+tenth of a second. That aside, the general form for calculating combinations is the total
+possible symbols to the power of the length:
+
+    C = |S|^L
+
+where S is the set of symbols and L is the length.
+
+This gets a little more complicated when we consider other types of attacks. If your
+password was the word 'terrible', an attacker could try to brute force it, or they could
+be smart and simply guess english words. Hint, there are a lot fewer english words than
+possible letter combinations. The attacker would guess it much faster. Instead, we have
+to treat the whole word 'terrible' as its own symbol from the set of english words.
+CrystalPass has a default wordset of about 63,000 words, but this can be reasonably
+downsized to about 8,000 more common words.
+
+What this means is that the entropy of the password is based on how your attacker
+guesses. This is actually the main reason generic feedback meters are so inaccurate.
+To make our feedback more accurate, we assume that the attacker knows the pattern used to
+generate the password. In addition to being very accurate, our attacker is much stronger
+as well. If we can make strength guarantees about a password against this attacker, we
+can also reason that the password will stand up to many more weaker attacks.
+
+So what makes for a good entropy? To find out I did my own analysis on the expected time
+to crack a password of a given entropy. The summary results are below:
+
+    Entropy     Time-to-crack
+    40          0.5 Seconds
+    55          5 Hours
+    65          213 Days
+    75          600 Years
+    95          628 Million Years
+    110         20 Trillion Years
+
+Please note that these results are based on an attacker trying to guess a single password
+at a rate of 1 TH/s (Terahash per second).
+
+I consider a password with entropy between 80 and 100 bits to be strong.

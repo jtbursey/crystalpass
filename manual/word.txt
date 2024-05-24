@@ -1,0 +1,18 @@
+Word
+
+This expression chooses a random word based on word length.
+
+Arguments:
+
+    length - The length or lengths of the words to choose from.
+
+    caps - Can be 'true' or 'false' to use random capitals, or 'begin' or 'end' to
+           capitalize the first or last letter of the word.
+    
+    subs - Can be either 'true' or 'false' to use common ascii substitutions such as 'a'
+           becoming '@'.
+
+For the purpose of random, all words of the given lengths are put into a single list and
+then chosen from at random.
+
+Ascii substitutions happen before capitalizations.
