@@ -9,17 +9,20 @@ class Manual:
     fr : tk.Frame
     sel : tk.Listbox
     txt : tk.Text
+    scroll : tk.Scrollbar
 
     font : str
 
     contents = [
         ("Crystalpass", os.path.join("manual", "crystalpass.txt")),
-        ("Good Practices", os.path.join("manual", "good_practices.txt")),
+        ("Password Cracking", os.path.join("manual", "cracking.txt")),
+        ("Best Practices", os.path.join("manual", "best_practices.txt")),
         ("Password Feedback", os.path.join("manual", "feedback.txt")),
         ("Password Entropy", os.path.join("manual", "entropy.txt")),
         ("Usage", os.path.join("manual", "usage.txt")),
         ("Wizard", os.path.join("manual", "wizard.txt")),
         ("Expressions", os.path.join("manual", "expressions.txt")),
+        ("  Arguments", os.path.join("manual", "args.txt")),
         ("  Word", os.path.join("manual", "word.txt")),
         ("  Digit", os.path.join("manual", "digit.txt")),
         ("  Letter", os.path.join("manual", "letter.txt")),
@@ -60,6 +63,11 @@ class Manual:
         Manual.txt = tk.Text(master=Manual.fr, width=90, height=25, borderwidth=3, relief=tk.FLAT, bg="white", state='disabled')
         Manual.txt.configure(font=Manual.font, cursor="")
         Manual.txt.pack(fill=tk.BOTH, side=tk.LEFT, padx=4, pady=4, expand=True)
+
+        Manual.scroll = tk.Scrollbar(master=Manual.fr, command=Manual.txt.yview)
+        Manual.scroll.pack(fill=tk.Y, side=tk.LEFT)
+
+        Manual.txt['yscrollcommand'] = Manual.scroll.set
 
         for c in Manual.contents:
             Manual.sel.insert(tk.END, c[0])
