@@ -12,5 +12,5 @@ Arguments:
                 (i.e. "12") or a range (i.e. 0-9). The words 'set' and 'range' are not
                 used.
 
-For range lengths, the length is chosen at random first, then that number of letterss are
+For range lengths, the length is chosen at random first, then that number of letters are
 chosen at random.
