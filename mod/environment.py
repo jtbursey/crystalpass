@@ -7,8 +7,8 @@ class Environment:
     wordlists = []
     blocklist = []
     addlist = []
-    capsFreq = 0.3
-    subsFreq = 0.7
+    capsFreq = 0.5
+    subsFreq = 0.5
     escape = '\\'
     symbolSet = string.punctuation
     wordlist_file = os.path.join("resources", "wordlists", "common-english-clean.txt")
