@@ -14,22 +14,22 @@ class Manual:
     font : str
 
     contents = [
-        ("Crystalpass", os.path.join("manual", "crystalpass.txt")),
-        ("Password Cracking", os.path.join("manual", "cracking.txt")),
-        ("Best Practices", os.path.join("manual", "best_practices.txt")),
-        ("Password Feedback", os.path.join("manual", "feedback.txt")),
-        ("Password Entropy", os.path.join("manual", "entropy.txt")),
-        ("Usage", os.path.join("manual", "usage.txt")),
-        ("Wizard", os.path.join("manual", "wizard.txt")),
-        ("Expressions", os.path.join("manual", "expressions.txt")),
-        ("  Arguments", os.path.join("manual", "args.txt")),
-        ("  Word", os.path.join("manual", "word.txt")),
-        ("  Digit", os.path.join("manual", "digit.txt")),
-        ("  Letter", os.path.join("manual", "letter.txt")),
-        ("  Symbol", os.path.join("manual", "symbol.txt")),
-        ("  Character", os.path.join("manual", "character.txt")),
-        ("  Named", os.path.join("manual", "named.txt")),
-        ("  Literals", os.path.join("manual", "literal.txt"))
+        ("Crystalpass", os.path.join("manual", "pages", "crystalpass.txt")),
+        ("Password Cracking", os.path.join("manual", "pages", "cracking.txt")),
+        ("Best Practices", os.path.join("manual", "pages", "best_practices.txt")),
+        ("Password Feedback", os.path.join("manual", "pages", "feedback.txt")),
+        ("Password Entropy", os.path.join("manual", "pages", "entropy.txt")),
+        ("Usage", os.path.join("manual", "pages", "usage.txt")),
+        ("Wizard", os.path.join("manual", "pages", "wizard.txt")),
+        ("Expressions", os.path.join("manual", "pages", "expressions.txt")),
+        ("  Arguments", os.path.join("manual", "pages", "args.txt")),
+        ("  Word", os.path.join("manual", "pages", "word.txt")),
+        ("  Digit", os.path.join("manual", "pages", "digit.txt")),
+        ("  Letter", os.path.join("manual", "pages", "letter.txt")),
+        ("  Symbol", os.path.join("manual", "pages", "symbol.txt")),
+        ("  Character", os.path.join("manual", "pages", "character.txt")),
+        ("  Named", os.path.join("manual", "pages", "named.txt")),
+        ("  Literals", os.path.join("manual", "pages", "literal.txt"))
     ]
 
     def update():
