@@ -8996,7 +8996,6 @@ chinchilla
 chinchillas
 chink
 chinked
-chinking
 chinks
 chinned
 chinning
@@ -23395,7 +23394,6 @@ gimmick
 gimmickry
 gimmicks
 gimmicky
-gimpy
 gin
 ginger
 gingerbread
